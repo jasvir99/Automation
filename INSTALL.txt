@@ -2,6 +2,11 @@
 AUTOMATION INSTALLATION
 """"""""""""""""""""""""
 
+""""""""""""""""""""""""""""""""""""""""""""""""
+For Automatic Installation Please refer Auto.txt
+""""""""""""""""""""""""""""""""""""""""""'"""""
+
+
 NOTE:
 # For installing TCC Automation software, make sure that your computer has MYSQL and Django installed.
 # This application is tested for Django version 1.4.
