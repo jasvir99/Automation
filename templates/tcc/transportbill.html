@@ -1,0 +1,31 @@
+<html>
+<head><title>Transport Bill</title></head>
+<body><center><h3>TRANSPORT BILL<br>({{ address}})</h3><br>{{ title.name }}</center>
+<br/>
+<div align="left"> Bill No.: {{transport.bill_no }}</div>
+<div align="right"> Dated : {{ transport.date }}</div>
+<div align="left">Name : {% for clients in client %}
+			{{clients.client__client__first_name}} {{clients.client__client__middle_name}} 
+			{{clients.client__client__last_name}} {{clients.client__client__address}}{% endfor %}</div> 
+<br/><br/><br/>
+
+<div align="left"></div>
+<center><table border=1 width="75%" height="25%" >
+	<tr>
+		<th align="center">Date of Use </th>
+		<th align="center">No. of Km</th>
+		<th align="center">Rate</th>
+		<th align="center">Amount</th>
+	</tr>
+	<tr align="center">
+		<td >{{transport.test_date}}<br> PB-10-DA 4574</td>
+		<td >{{transport.kilometer}}</td >
+		<td>{{rate}}</td>
+		<td>{{transport.total}}.00</td>
+	</tr>
+</table></center>
+<br/><br/>
+<div align="left"><b>  {{vehicle_no.name}}</b></div><br/><br/>
+<div align="right"><b> Dean Testing and Consultancy Cell {{sub_title.name}}</b></div>
+</body>
+</html>
