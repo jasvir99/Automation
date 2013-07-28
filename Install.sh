@@ -49,6 +49,7 @@ Media()	#copies media folder into (~/contrib/admin/)
 	{
     	dir_tar=/usr/local/lib/python2.7/dist-packages/django/contrib/admin/
     	cp -r  other_files/media/ $dir_tar
+		cp other_files/base.html $dir_tar/templates/admin/
     	chmod -R 777 $dir_tar/media
 	}	
 Restart() #restarts apache
