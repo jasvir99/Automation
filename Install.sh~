@@ -153,9 +153,9 @@ Database()
 	 path=$PWD     #this passes PWD value in path
 	 echo "Successfully downloading the software at-$path"
 	 echo ""
-	 sed -i "s#mpath#"$path"#g"  Automation/other_files/hhtp_cont
-	 sed -i "s#mpath#"$path"#g"  Automation/apache/django.wsgi
-	 sed -i "s#mpath#"$path"#g"  Automation/settings.py
+	 sed -i "s#mPath#"$path"#g"  Automation/other_files/hhtp_cont
+	 sed -i "s#mPath#"$path"#g"  Automation/apache/django.wsgi
+	 sed -i "s#mPath#"$path"#g"  Automation/settings.py
 
 
 
