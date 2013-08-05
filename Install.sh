@@ -17,7 +17,7 @@
 
 
 
-read -p "Please enter password provided in Auto file:" read_pass
+read -p "Please enter password provided in Manual:" read_pass
 if [ $read_pass = 007700 ]; then
 	check=0
 	dir_path=$(pwd)
@@ -331,8 +331,8 @@ if  [ $result = $1 ]; then
 }
 Dependencies()
 {
-dep=(mysql-server python2.7 python-pip python-setuptools python-mysqldb \
-apache2 libapache2-mod-wsgi sysvbanner)
+dep=(mysql-server python2.7 python-pip python-imaging python-setuptools \
+python-mysqldb apache2 libapache2-mod-wsgi sysvbanner)
 for i in "${dep[@]}"
 	do
 		Package $i
@@ -348,6 +348,5 @@ Dependencies
 	fi
 else
 banner "Read"
-banner "Auto"
-banner "File"
+banner "Manual"
 fi
