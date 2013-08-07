@@ -288,7 +288,7 @@ Install_django()	#Installs django 1.4.2 if it is not installed.
 	else
 			  echo "Django 1.4.2 is currently not installed"
 			  echo "You want to install it now: (y for yes, " \
-			       "otherwise aborted):"
+			       "continue otherwise):"
 			  read Y
 		      if [ $Y = y ] || [ $Y = Y ]
 			  then
@@ -302,8 +302,8 @@ Install_django()	#Installs django 1.4.2 if it is not installed.
 					cd ../
 					Install
 			 else
-					echo "Aborted"
-			        exit
+					echo "You have not installed Django 1.4.2"
+			        Install
 		     fi
 	fi
 
