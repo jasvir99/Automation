@@ -303,6 +303,8 @@ Install_django()	#Installs django 1.4.2 if it is not installed.
 					Install
 			 else
 					echo "You have not installed Django 1.4.2"
+					pip install django-registration
+					pip install django-tagging
 			        Install
 		     fi
 	fi

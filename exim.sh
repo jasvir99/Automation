@@ -71,7 +71,7 @@ else
 	echo "You want to install it now: (y for yes, " \
 		 "otherwise aborted):"	
 	read Y
-	if [ $Y = y ] || [ $Y = Y]; then
+	if [ $Y = y ] || [ $Y = Y ]; then
 		apt-get install Exim4	#installation of exim server
 		Configure				#calling of Configure function
 	else 
