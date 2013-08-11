@@ -59,23 +59,5 @@ clear
 echo -e "\v\v\v\v\v\t\t\t\t\t::::::::::Installation " \
 		"of Exim server:::::::::::"
 
-#Now it chekcs that exim server is already installed or not.
-result=$(dpkg-query -W -f='${package}\n' "exim4") 
-
-if [ $result = exim4 ]
-then
-	echo "********Exim4 already installed***********"
-	Option						#calling of Option function
-else
-	echo "Exim4 is not installed in your system"
-	echo "You want to install it now: (y for yes, " \
-		 "otherwise aborted):"	
-	read Y
-	if [ $Y = y ] || [ $Y = Y ]; then
 		apt-get install Exim4	#installation of exim server
 		Configure				#calling of Configure function
-	else 
-		echo "Aborted" 
-		exit
-	fi
-fi
