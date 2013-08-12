@@ -312,6 +312,47 @@ def gen_report_perf(request):
 	p = TestTotalPerf(unit_price=unit_price, job=client,rate=0)
 	p.save()
 	return HttpResponseRedirect(reverse('Automation.tcc.views_ext.job_submit_perf'))
+
+def gen_report(request):
+	"""
+	** gen_report **
+
+	The lab works come here. Then depending upon the mode of payemnt
+	of the Job, it is categorised as General Report work or Suspence
+	work. The jobs whos mode of payment is cash and has 0 TDS amount
+	are called General Report. All the other jobs are categorised as
+	Suspence.
+	"""
+	job = Job.objects.aggregate(Max('id'))
+	jobmaxid = job['id__max']
+	client = Job.objects.get(id=jobmaxid)
+	clients = ClientJob.objects.get(job_id =client.id)
+	testtotal = TestTotal.objects.get(job_id =client.id)
+	unit_price=testotal.unit_price
+	if client.pay == "cash" and client.tds == 0:
+		report_type = "General_report"
+		from Automation.tcc.variable import *
+		type =clients.material.distribution.name
+		college_income = round(collegeincome * unit_price / 100.00)
+		admin_charge = round(admincharge * unit_price / 100.00)
+		temp =  unit_price - college_income - admin_charge
+		ratio1 = ratio1(type)
+		ratio2 = ratio2(type)
+		consultancy_asst = round(ratio1 * temp / 100)
+		development_fund = round(ratio2 * temp / 100)
+		m = Amount(job = client ,unit_price=unit_price,development_fund
+		=development_fund, college_income =college_income, admin_charge
+		=admin_charge, consultancy_asst=consultancy_asst,report_type = 
+		report_type)
+		m.save()
+	else:
+		report_type = "Suspence"
+		sus = Suspence(rate=0,job=client)
+		sus.save()
+		amt = Amount(job = client ,unit_price=unit_price,report_type 
+		= report_type,)
+		amt.save()
+	return HttpResponseRedirect(reverse('Automation.tcc.views.job_submit'))
 	
 
 def add_suspence_perf(request):
@@ -465,7 +506,7 @@ def get_performa_bill(request):
 		job = EditJob.objects.filter(job_no = query).values('id', 
 		'client__client__first_name', 'client__client__address', 
 		'client__client__city', 'clienteditjob__material__name', 
-		'suspenceeditjob__field__name', 'site', 'testtotalperf__unit_price')\
+		'suspenceeditjob__field__name', 'site', 'testtotalperf__unit_price',)\
 		.order_by('id').distinct()
 	else:	
 		job =[]
@@ -492,7 +533,7 @@ def billperf(request):
 	getjob = EditJob.objects.all().filter(job_no=job_no).values(
 	'clienteditjob__material__name','date','testtotalperf__unit_price','site',
 	'suspenceeditjob__field__name','suspenceeditjob__other','report_type','sample',
-	'clienteditjob__other_test','note').distinct()
+	'clienteditjob__other_test','note',).distinct()
 	getadd = EditJob.objects.all().filter(id = jobid).values('client__client__first_name', 
 	'client__client__middle_name', 'client__client__last_name',
 	'client__client__address', 'client__client__city', 
@@ -621,3 +662,32 @@ def edit_work(request):
 		return render_to_response('tcc/performa/edit_job.html', dict(temp.items() + 
 		tmp.items()) ,context_instance=RequestContext(request))
 		
+def add_suspence(request):
+	"""
+	** add_suspence **
+
+	The calculation for the price of the material to be tested is 
+	calculated here. The rate for the distance calculated is also
+	calculated here and the same is put in the suspence table.
+	"""
+	susmax = SuspenceJob.objects.aggregate(Max('id'))
+	minid =susmax['id__max']
+	client = SuspenceJob.objects.get(id=minid)
+	value = SuspenceJob.objects.values_list('test').filter(id=minid)
+	values = Test.objects.get(id = value)
+	dist =  Distance.objects.aggregate(Max('id'))
+	distid =dist['id__max']
+	site = Distance.objects.get(id=distid)
+	distance = 2*site.sandy
+	report_type = "Suspence" 
+	if distance < 100:
+		rate = 1000
+	elif distance == 0:
+		rate = 0
+	else :
+		rate = 10*distance
+	m = Suspence(rate=rate, sus=client,job=job)
+	m.save()
+	amt = Amount(job = job ,unit_price=price,report_type = report_type,)
+	amt.save()
+	return HttpResponseRedirect(reverse('Automation.tcc.views.job_submit'))

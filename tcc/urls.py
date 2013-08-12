@@ -56,8 +56,8 @@ urlpatterns = patterns('Automation.tcc.views',
     (r'^nonpayment/$', 'non_payment_job'),
     (r'^registered_user/$', 'registered_user'), 
     (r'^search_new/$', 'search_new'), 
-    (r'^programme/$', 'programme'),
-	(r'^search_transport/$', 'search_transport'), 
+    (r'^letter/$', 'letter_staff'), 
+	(r'^convert/$', 'Convert'),
 )
 
 urlpatterns += patterns('Automation.tcc.registers',
@@ -91,4 +91,6 @@ urlpatterns += patterns('Automation.tcc.views_ext',
     (r'^get_document_perf/$', 'get_document_perf'),
     (r'^otherperftest/$', 'add_perf_other_test'),
     (r'^perfmap/$', 'perf_distance'),
+    (r'^add_suspence/$', 'add_suspence'),
+    (r'^gen_report/$','gen_report'),
    )

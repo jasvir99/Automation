@@ -92,7 +92,6 @@ def edit_profile(request):
 		return render_to_response('tcc/client.html',dict(x.items() + 
 		tmp.items()), context_instance = RequestContext(request))
 	
-@login_required
 def profile(request):
 	"""
 	** profile **
@@ -127,9 +126,19 @@ def profile(request):
 			middle_name, last_name = last_name, company = company, 
 			address = address, city = city, pin_code = pin_code, state 
 			= state, website = website, contact_no = contact_no, 
-			type_of_organisation = 
-	type_of_organisation, user = user)
+			type_of_organisation = type_of_organisation, user = user)
 			pro.save()
+			soundex_fname = search_func(first_name)   # Added.....
+			soundex_mname = search_func(middle_name)
+			soundex_lname = search_func(last_name)
+			soundex_company = search_func(company)
+			soundex_address = search_func(address)
+			soundex_city = search_func(city)
+			sound = Soundexsearch(soundex_fname = soundex_fname, soundex_mname =  # Added.....
+			soundex_mname, soundex_lname = soundex_lname, soundex_address = 
+			soundex_address, soundex_company = soundex_company, soundex_city =
+			soundex_city)
+			sound.save()
 			id = UserProfile.objects.aggregate(Max('id'))
 			maxid =id['id__max']	
 			x = {'form': form,'maxid':maxid,}	
@@ -164,7 +173,7 @@ def non_payment_job(request):
 	else:
 		maxid = maxid + 1
 	user = UserProfile.objects.get(id=request.GET['id'])
-	id=request.GET['id']
+	id = request.GET['id']
 	if request.method == 'POST':
 		form = NonPaymentJobForm(request.POST)
 		if form.is_valid():
@@ -173,7 +182,7 @@ def non_payment_job(request):
 			profile.job_no = maxid
 			profile.save()
 			form.save_m2m()
-			x = {'form': form, 'user': id}		
+			x = {'form': form,'user': id}		
 			return render_to_response('tcc/nonpayment_job_ok.html',
 			dict(x.items() + tmp.items()), context_instance=
 			RequestContext(request))
@@ -761,7 +770,7 @@ def job_submit(request):
 	addid =add['id__max']
 	more = Clientadd.objects.get(id=addid)
 	moremat = more.client_id
-	temp = {'clients':clients,'value':value,'moremat':moremat,'jobno'
+	temp = {'value':value,'moremat':moremat,'jobno'
 	:jobno}
 	return render_to_response('tcc/job_submit.html',dict(temp.items() + 
 	tmp.items()), context_instance=RequestContext(request))
@@ -780,7 +789,7 @@ def job_ok(request):
 	id = Job.objects.aggregate(Max('job_no'))
 	maxid =id['job_no__max']
 	job_no = maxid
-	value =Job.objects.values_list('testtotal__unit_price',flat=True)\
+	value =	Job.objects.values_list('testtotal__unit_price',flat=True)\
 	.filter(job_no=maxid)
 	price = sum(value)
 	from Automation.tcc.variable import *
@@ -1132,7 +1141,7 @@ def transport_bill(request):
 	job = Job.objects.get(job_no=request.GET['job_no'])
 	client = Job.objects.filter(job_no =
 	job.job_no).values('client__client__first_name',
-	'client__client__middle_name', 'client__client__last_name','client__client__address')
+	'client__client__middle_name', 'client__client__last_name')
 	kilometer = transport_old.kilometer
 	temp = [0,0,0,0,0,0,0,0,0,0]
 	range = kilometer.split(',')
@@ -1251,14 +1260,6 @@ def ta_da_bill(request):
 	return render_to_response('tcc/ta_da_bill.html', data , 
 	context_instance = RequestContext(request))
 
-def search_transport(request):
-	query = request.GET.get('q', '')
-	if query :
-		results = Transport.objects.filter(job_no = query).values()
-	else:
-		results = []
-	temp = {"results": results,"query": query,}
-	return render_to_response("tcc/search_transport.html", dict(temp.items() + tmp.items()), context_instance=RequestContext(request) )
 def distance(request):
 	"""
 	** distance **
@@ -1365,9 +1366,10 @@ def search_new(request):
 		entry_query = get_query(query_string, ['first_name', 'middle_name',
 		'last_name', 'address','city'])
 		found_entries = UserProfile.objects.filter(entry_query).order_by('date')
-	temp = { 'query_string': query_string, 'found_entries': found_entries }
-	return render_to_response('tcc/search_results.html', dict(temp.items() + tmp.items()), context_instance=
-	RequestContext(request))
+        temp ={ 'query_string': query_string, 'found_entries': found_entries }
+        return render_to_response('tcc/search_results.html',
+    dict(temp.items() + tmp.items()), context_instance=
+    RequestContext(request))
                           
 @login_required
 def search(request):
@@ -1708,38 +1710,56 @@ def registered_user(request):
 	return render_to_response("tcc/registered_user.html", dict(temp.items() + 
 	tmp.items()),context_instance=RequestContext(request))
 
-def programme(request):
+def letter_staff(request):
 	if request.method == 'POST':
-		form = ProgrammeForm(request.POST)
+		form = SelStaffForm(request.POST)
 		if form.is_valid():
-			cd = form.cleaned_data		
-		staff = request.POST.getlist('name')
-		profile = form.save(commit=False)
-       		profile.save()
-       		form.save_m2m()
-		staffmax = Programme.objects.aggregate(Max('id'))
+			cd = form.cleaned_data
+        	staff = request.POST.getlist('staff')
+        	profile = form.save(commit=False)
+        	profile.save()
+        	form.save_m2m()
+        	staffmax = SelStaff.objects.aggregate(Max('id'))
         	staffid =staffmax['id__max']
-        	staff = Programme.objects.filter(id=staffid).values('staff__name')
-       		#temp = {'form':form,'staff':staff}
-		organisation = Organisation.objects.all()
-		department = Department.objects.all().filter(id = 1)		
-		done = Programme.objects.all().filter(id=staffid).values('client_department_name', 'phone_no', 'on', 'at', 'addr', 			'city', 'site','date') 
-		usermax = Programme.objects.aggregate(Max('id'))
-		userid =usermax['id__max']		
-		name_list = UserProfile.objects.all().filter(id=userid).values('first_name', 'last_name')
-		id = Job.objects.aggregate(Max('id'))
-		maxid =id['id__max']
-		job = Job.objects.get(id = maxid)
-	
-		job_date =job.date
-		amtid = Amount.objects.aggregate(Max('id'))
-		amtmaxid =amtid['id__max']
-		amt = Amount.objects.get(job_id = amtmaxid)
-		template = {'form': form, 'organisation':organisation,'department':department, 'done':done, 'staff':staff}
-		return render_to_response('tcc/report11.html', template, context_instance=RequestContext(request))	
-			
+        	staff = SelStaff.objects.filter(id=staffid).values('staff__name')
+        	temp = {'form':form,'staff':staff}
+        	return render_to_response('tcc/letterstaff.html',dict(temp.items() + 
+        	tmp.items()),context_instance=RequestContext(request))
 	else:
-		form = ProgrammeForm()
+		form = SelStaffForm()
 	temp ={'form': form}
 	return render_to_response('tcc/new_client.html',dict(temp.items() + 
 	tmp.items()),context_instance=RequestContext(request))
+
+def Convert(request):
+			first_name = UserProfile.objects.filter(id=1).values('first_name')
+			for first in first_name:
+				first = first_name['first_name']
+				soundex_fname = search_func(first)
+			middle_name = UserProfile.objects.filter(id=1).values('middle_name')
+			for middle in middle_name:
+				middle = middle_name['middle_name']   # Added.....
+				soundex_mname = search_func(middle)
+			last_name = UserProfile.objects.filter(id=1).values('last_name')
+			for last in last_name:
+				last = last_name['last_name']
+				soundex_lname = search_func(last)
+			company = UserProfile.objects.filter(id=1).values('company')
+			for comp in company:
+				comp = company['company']
+				soundex_company = search_func(comp)
+			address = UserProfile.objects.filter(id=1).values('address')
+			for add in address:
+				add = address['address']
+				soundex_address = search_func(add)
+			city = UserProfile.objects.filter(id=1).values('city')
+			for ci in city:
+				ci = city['city']
+				soundex_city = search_func(ci)
+			sound = Soundexsearch(soundex_fname = soundex_fname, soundex_mname =  # Added.....
+			soundex_mname, soundex_lname = soundex_lname, soundex_address = 
+			soundex_address, soundex_company = soundex_company, soundex_city =
+			soundex_city)
+			sound.save()
+			return render_to_response('tcc/ok.html',dict(temp.items() + 
+			tmp.items()),context_instance=RequestContext(request))
