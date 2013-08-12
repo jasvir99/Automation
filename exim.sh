@@ -59,5 +59,5 @@ clear
 echo -e "\v\v\v\v\v\t\t\t\t\t::::::::::Installation " \
 		"of Exim server:::::::::::"
 
-		apt-get install Exim4	#installation of exim server
+		apt-get install exim4	#installation of exim server
 		Configure				#calling of Configure function
