@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 12, 2013 at 07:10 PM
+-- Generation Time: Aug 14, 2013 at 08:38 PM
 -- Server version: 5.5.32-0ubuntu0.13.04.1
 -- PHP Version: 5.4.9-4ubuntu2.2
 
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `auth_permission` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `content_type_id` (`content_type_id`,`codename`),
   KEY `auth_permission_e4470c6e` (`content_type_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=223 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=226 ;
 
 --
 -- Dumping data for table `auth_permission`
@@ -202,12 +202,6 @@ INSERT INTO `auth_permission` (`id`, `name`, `content_type_id`, `codename`) VALU
 (130, 'Can add bankdetails', 44, 'add_bankdetails'),
 (131, 'Can change bankdetails', 44, 'change_bankdetails'),
 (132, 'Can delete bankdetails', 44, 'delete_bankdetails'),
-(133, 'Can add prog_letter', 45, 'add_prog_letter'),
-(134, 'Can change prog_letter', 45, 'change_prog_letter'),
-(135, 'Can delete prog_letter', 45, 'delete_prog_letter'),
-(136, 'Can add programme', 46, 'add_programme'),
-(137, 'Can change programme', 46, 'change_programme'),
-(138, 'Can delete programme', 46, 'delete_programme'),
 (139, 'Can add search', 47, 'add_search'),
 (140, 'Can change search', 47, 'change_search'),
 (141, 'Can delete search', 47, 'delete_search'),
@@ -291,7 +285,10 @@ INSERT INTO `auth_permission` (`id`, `name`, `content_type_id`, `codename`) VALU
 (219, 'Can delete tag', 73, 'delete_tag'),
 (220, 'Can add tagged item', 74, 'add_taggeditem'),
 (221, 'Can change tagged item', 74, 'change_taggeditem'),
-(222, 'Can delete tagged item', 74, 'delete_taggeditem');
+(222, 'Can delete tagged item', 74, 'delete_taggeditem'),
+(223, 'Can add sel staff', 75, 'add_selstaff'),
+(224, 'Can change sel staff', 75, 'change_selstaff'),
+(225, 'Can delete sel staff', 75, 'delete_selstaff');
 
 -- --------------------------------------------------------
 
@@ -320,7 +317,7 @@ CREATE TABLE IF NOT EXISTS `auth_user` (
 --
 
 INSERT INTO `auth_user` (`id`, `username`, `first_name`, `last_name`, `email`, `password`, `is_staff`, `is_active`, `is_superuser`, `last_login`, `date_joined`) VALUES
-(1, 'jass', '', '', 'jassigrewal91@gmail.com', 'pbkdf2_sha256$10000$SWOQDn42Up2s$LjERHrj/maA0fj/NLqtpho1gS1/O1OgfJjyDQ/E/3cc=', 1, 1, 1, '2013-08-12 19:08:36', '2013-08-12 19:05:52');
+(1, 'jass', '', '', 'jassigrewal91@gmail.com', 'pbkdf2_sha256$10000$SWOQDn42Up2s$LjERHrj/maA0fj/NLqtpho1gS1/O1OgfJjyDQ/E/3cc=', 1, 1, 1, '2013-08-14 20:36:02', '2013-08-12 19:05:52');
 
 -- --------------------------------------------------------
 
@@ -387,7 +384,7 @@ CREATE TABLE IF NOT EXISTS `django_content_type` (
   `model` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `app_label` (`app_label`,`model`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=75 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=76 ;
 
 --
 -- Dumping data for table `django_content_type`
@@ -438,8 +435,6 @@ INSERT INTO `django_content_type` (`id`, `name`, `app_label`, `model`) VALUES
 (42, 'transportation', 'tcc', 'transportation'),
 (43, 'transport', 'tcc', 'transport'),
 (44, 'bankdetails', 'tcc', 'bankdetails'),
-(45, 'prog_letter', 'tcc', 'prog_letter'),
-(46, 'programme', 'tcc', 'programme'),
 (47, 'search', 'report', 'search'),
 (48, 'report', 'report', 'report'),
 (49, 'cube', 'report', 'cube'),
@@ -467,7 +462,8 @@ INSERT INTO `django_content_type` (`id`, `name`, `app_label`, `model`) VALUES
 (71, 'soil_ sample', 'report', 'soil_sample'),
 (72, 'drinking_water', 'report', 'drinking_water'),
 (73, 'tag', 'tagging', 'tag'),
-(74, 'tagged item', 'tagging', 'taggeditem');
+(74, 'tagged item', 'tagging', 'taggeditem'),
+(75, 'sel staff', 'tcc', 'selstaff');
 
 -- --------------------------------------------------------
 
@@ -488,6 +484,7 @@ CREATE TABLE IF NOT EXISTS `django_session` (
 --
 
 INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALUES
+('373125abfc846d10620da3af2d7bcb82', 'MjM5OTY0MDJiOTc2NjRhMjBlZDM0NzZlNmRkOTlhZWQyOGQ2YTA5MzqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQF1Lg==\n', '2013-08-28 20:36:02'),
 ('b6a4c70c37ff9d564f33cad8c99fc493', 'MjM5OTY0MDJiOTc2NjRhMjBlZDM0NzZlNmRkOTlhZWQyOGQ2YTA5MzqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQF1Lg==\n', '2013-08-26 19:08:36'),
 ('b952e16f839445d795df56c18707296e', 'MjM5OTY0MDJiOTc2NjRhMjBlZDM0NzZlNmRkOTlhZWQyOGQ2YTA5MzqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQF1Lg==\n', '2013-08-26 19:06:15'),
 ('bca8acc488c5d40d7a611c1558a276ae', 'OGEwM2FlMTdmZWEwZDdhODBlN2JlYjVmNDgyNzMzNzliNzIwMTk1ODqAAn1xAVUKdGVzdGNvb2tp\nZXECVQZ3b3JrZWRxA3Mu\n', '2013-08-26 19:06:51');
@@ -1260,14 +1257,15 @@ CREATE TABLE IF NOT EXISTS `tcc_amount` (
   `report_type` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `tcc_amount_751f44ae` (`job_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 --
 -- Dumping data for table `tcc_amount`
 --
 
 INSERT INTO `tcc_amount` (`id`, `job_id`, `college_income`, `admin_charge`, `consultancy_asst`, `development_fund`, `unit_price`, `report_type`) VALUES
-(1, 1, 308, 103, 656, 983, 2050, 'General_report');
+(1, 1, 308, 103, 656, 983, 2050, 'General_report'),
+(2, 2, 90, 30, 192, 288, 600, 'General_report');
 
 -- --------------------------------------------------------
 
@@ -1303,14 +1301,15 @@ CREATE TABLE IF NOT EXISTS `tcc_bill` (
   `trans_net_total` int(11) DEFAULT NULL,
   `balance` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 --
 -- Dumping data for table `tcc_bill`
 --
 
 INSERT INTO `tcc_bill` (`id`, `job_no`, `education_tax`, `higher_education_tax`, `service_tax`, `net_total`, `price`, `discount_total`, `trans_total`, `trans_net_total`, `balance`) VALUES
-(1, 1, 5, 2, 246, 2303, 2050, 0, NULL, 2050, 2303);
+(1, 1, 5, 2, 246, 2303, 2050, 0, NULL, 2050, 2303),
+(2, 2, 1, 1, 72, 674, 600, 0, NULL, 600, 674);
 
 -- --------------------------------------------------------
 
@@ -1364,14 +1363,15 @@ CREATE TABLE IF NOT EXISTS `tcc_clientadd` (
   PRIMARY KEY (`id`),
   KEY `tcc_clientadd_fbfc09f1` (`user_id`),
   KEY `tcc_clientadd_4a4e8ffb` (`client_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 --
 -- Dumping data for table `tcc_clientadd`
 --
 
 INSERT INTO `tcc_clientadd` (`id`, `user_id`, `client_id`, `job_no`) VALUES
-(1, 1, 1, 1);
+(1, 1, 1, 1),
+(2, 1, 2, 2);
 
 -- --------------------------------------------------------
 
@@ -1419,14 +1419,15 @@ CREATE TABLE IF NOT EXISTS `tcc_clientjob` (
   PRIMARY KEY (`id`),
   KEY `tcc_clientjob_751f44ae` (`job_id`),
   KEY `tcc_clientjob_fab9ba43` (`material_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 --
 -- Dumping data for table `tcc_clientjob`
 --
 
 INSERT INTO `tcc_clientjob` (`id`, `job_id`, `material_id`, `other_test`) VALUES
-(1, 1, 13, '');
+(1, 1, 13, ''),
+(2, 2, 3, '');
 
 -- --------------------------------------------------------
 
@@ -1442,7 +1443,7 @@ CREATE TABLE IF NOT EXISTS `tcc_clientjob_test` (
   UNIQUE KEY `clientjob_id` (`clientjob_id`,`test_id`),
   KEY `tcc_clientjob_test_244d514d` (`clientjob_id`),
   KEY `tcc_clientjob_test_a88de8dc` (`test_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
 
 --
 -- Dumping data for table `tcc_clientjob_test`
@@ -1451,7 +1452,9 @@ CREATE TABLE IF NOT EXISTS `tcc_clientjob_test` (
 INSERT INTO `tcc_clientjob_test` (`id`, `clientjob_id`, `test_id`) VALUES
 (2, 1, 183),
 (1, 1, 187),
-(3, 1, 191);
+(3, 1, 191),
+(4, 2, 19),
+(5, 2, 20);
 
 -- --------------------------------------------------------
 
@@ -1618,14 +1621,15 @@ CREATE TABLE IF NOT EXISTS `tcc_job` (
   KEY `tcc_job_4a4e8ffb` (`client_id`),
   KEY `tcc_job_ca5d2cd8` (`type_of_work_id`),
   KEY `tcc_job_3d4f9c7e` (`report_type_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 --
 -- Dumping data for table `tcc_job`
 --
 
 INSERT INTO `tcc_job` (`id`, `client_id`, `job_no`, `sample`, `ip`, `site`, `type_of_work_id`, `report_type_id`, `pay`, `check_number`, `check_dd_date`, `date`, `letter_no`, `letter_date`, `tds`, `discount`) VALUES
-(1, 1, 1, 1, '127.0.0.1', 'ldh', 1, 1, 'cash', '', '', '2013-08-12', '12', '2013-08-11', 0, 0);
+(1, 1, 1, 1, '127.0.0.1', 'ldh', 1, 1, 'cash', '', '', '2013-08-12', '12', '2013-08-11', 0, 0),
+(2, 2, 2, 1, '127.0.0.1', 'ldh', 1, 1, 'cash', '', '', '2013-08-14', '12', '2013-08-14', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -1917,28 +1921,54 @@ INSERT INTO `tcc_report` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tcc_selstaff`
+--
+
+CREATE TABLE IF NOT EXISTS `tcc_selstaff` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tcc_selstaff_staff`
+--
+
+CREATE TABLE IF NOT EXISTS `tcc_selstaff_staff` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `selstaff_id` int(11) NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `selstaff_id` (`selstaff_id`,`staff_id`),
+  KEY `tcc_selstaff_staff_1c938192` (`selstaff_id`),
+  KEY `tcc_selstaff_staff_a2044c77` (`staff_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `tcc_soundexsearch`
 --
 
 CREATE TABLE IF NOT EXISTS `tcc_soundexsearch` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
+  `id_id` int(11) NOT NULL AUTO_INCREMENT,
   `soundex_fname` varchar(100) NOT NULL,
   `soundex_mname` varchar(100) DEFAULT NULL,
   `soundex_lname` varchar(100) DEFAULT NULL,
   `soundex_address` varchar(255) DEFAULT NULL,
   `soundex_company` varchar(255) DEFAULT NULL,
   `soundex_city` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `tcc_soundexsearch_fbfc09f1` (`user_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+  PRIMARY KEY (`id_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 --
 -- Dumping data for table `tcc_soundexsearch`
 --
 
-INSERT INTO `tcc_soundexsearch` (`id`, `user_id`, `soundex_fname`, `soundex_mname`, `soundex_lname`, `soundex_address`, `soundex_company`, `soundex_city`) VALUES
-(1, 1, 'J216', 'S520', 'G640', '#235', 'G640', 'L300');
+INSERT INTO `tcc_soundexsearch` (`id_id`, `soundex_fname`, `soundex_mname`, `soundex_lname`, `soundex_address`, `soundex_company`, `soundex_city`) VALUES
+(1, 'hjkh', NULL, NULL, NULL, NULL, NULL),
+(2, 'J216', 'S520', 'G640', '#235', 'G640', 'L300');
 
 -- --------------------------------------------------------
 
@@ -2390,14 +2420,15 @@ CREATE TABLE IF NOT EXISTS `tcc_testtotal` (
   `unit_price` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `tcc_testtotal_751f44ae` (`job_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 --
 -- Dumping data for table `tcc_testtotal`
 --
 
 INSERT INTO `tcc_testtotal` (`id`, `job_id`, `unit_price`) VALUES
-(1, 1, 2050);
+(1, 1, 2050),
+(2, 2, 600);
 
 -- --------------------------------------------------------
 
@@ -2485,14 +2516,15 @@ CREATE TABLE IF NOT EXISTS `tcc_userprofile` (
   `date` date NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tcc_userprofile_fbfc09f1` (`user_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 --
 -- Dumping data for table `tcc_userprofile`
 --
 
 INSERT INTO `tcc_userprofile` (`id`, `user_id`, `first_name`, `middle_name`, `last_name`, `address`, `company`, `city`, `pin_code`, `state`, `website`, `email_address`, `contact_no`, `type_of_organisation`, `date`) VALUES
-(1, 1, 'Jasvir ', 'Singh', 'Grewal', '#308,st.no 5A, near water', 'grewal', 'ldh', 141007, 'Punjab', 'http://dfs.cdc.com/', NULL, '9815424023', 'SEMI-GOVERNMENT', '2013-08-12');
+(1, 1, 'Jasvir ', 'Singh', 'Grewal', '#308,st.no 5A, near water', 'grewal', 'ldh', 141007, 'Punjab', 'http://dfs.cdc.com/', NULL, '9815424023', 'SEMI-GOVERNMENT', '2013-08-12'),
+(2, 1, 'Jasvir ', 'Singh', 'Grewal', '#308,st.no 5A, near water', 'grewal', 'ldh', 141007, 'Punjab', 'http://dfs.cdc.com/', NULL, '9815424023', 'PRIVATE', '2013-08-14');
 
 --
 -- Constraints for dumped tables
@@ -2778,10 +2810,17 @@ ALTER TABLE `tcc_nonpaymentjob`
   ADD CONSTRAINT `client_id_refs_id_c048bcad` FOREIGN KEY (`client_id`) REFERENCES `tcc_userprofile` (`id`);
 
 --
+-- Constraints for table `tcc_selstaff_staff`
+--
+ALTER TABLE `tcc_selstaff_staff`
+  ADD CONSTRAINT `selstaff_id_refs_id_7bce5bc0` FOREIGN KEY (`selstaff_id`) REFERENCES `tcc_selstaff` (`id`),
+  ADD CONSTRAINT `staff_id_refs_id_4155ed89` FOREIGN KEY (`staff_id`) REFERENCES `tcc_staff` (`id`);
+
+--
 -- Constraints for table `tcc_soundexsearch`
 --
 ALTER TABLE `tcc_soundexsearch`
-  ADD CONSTRAINT `user_id_refs_id_a29eb3e9` FOREIGN KEY (`user_id`) REFERENCES `tcc_userprofile` (`id`);
+  ADD CONSTRAINT `id_id_refs_id_a29eb3e9` FOREIGN KEY (`id_id`) REFERENCES `tcc_userprofile` (`id`);
 
 --
 -- Constraints for table `tcc_suspence`
