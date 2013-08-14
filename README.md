@@ -15,4 +15,7 @@ Automation is all about using the computer to:<br>
 
                              ****************INSTALLATION****************
 
-For installation refer's to manual.
+Clone this repository using: <br>
+$git clone https://github.com/jasvir99/Automation <br>
+
+Then read the manual for further information
