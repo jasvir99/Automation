@@ -298,6 +298,7 @@ Install_django()	#Installs django 1.4.2 if it is not installed.
 					python setup.py install
 					pip install django-registration
 					pip install django-tagging
+					pip install python-mysql
 					check=+1
 					cd ../
 					Install
@@ -305,6 +306,7 @@ Install_django()	#Installs django 1.4.2 if it is not installed.
 					echo "You have not installed Django 1.4.2"
 					pip install django-registration
 					pip install django-tagging
+					pip install python-mysql
 			        Install
 		     fi
 	fi
