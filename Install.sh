@@ -18,6 +18,7 @@
 
 
 read -p "Please enter password provided in Manual:" read_pass
+
 if [ $read_pass = 007700 ]; then
 	check=0
 	dir_path=$(pwd)
@@ -35,11 +36,14 @@ if [ $read_pass = 007700 ]; then
 
 	if [ $packet_loss -le 50 ]
 	then
+		apt-get install espeak
+		espeak "internet is working properly"
 		echo "::::::::::::INTERNET IS WORKING PROPERLY::::::::::::"
-	
+		
 
 Thanks()	#Thanks for Installation
 	{
+		espeak "thanks for installing Automation software"
 		banner "Thanks for"
 		banner "Installing"
 		banner "Automation Software"
@@ -100,18 +104,22 @@ Database()
 		  do
 		    
 	      	# inputs database name from the user
+			espeak "enter mysql username"
 		  	read -p "enter mysql username :" db_user
+			espeak "enter mysql password"
 		  	read -sp "enter mysql password :" db_password
 		  	RESULT=`mysql --user="$db_user" --password="$db_password" \
 		    --skip-column-names -e "SHOW DATABASES LIKE 'mysql'"` 2> \
 		    /dev/null
 		  	if [ $RESULT ]; then
+				espeak "username and password matches"
 		  		echo ""
-		  		echo "Username and password match"
+				echo "Username and password match"
 	      		echo "u r here"
 		  		a=+1
 		  		break
 		  	else
+				espeak "username and password doesn't mathes"
 		 		echo ""
 		  		echo "Username and password doesn't match"
 		  		echo "re-enter the details"
@@ -129,11 +137,13 @@ Database()
 	while [ $a -ne 2 ]
 		do
 			# inputs database name from the user
+			espeak "enter database name you want to create"
 		    read -p "enter database name you want to create :" db_name
 		    #checks the existance of database
 		    RESULT=`mysql --user="$db_user" --password="$db_password" \
 			--skip-column-names -e "SHOW DATABASES LIKE '$db_name'"`
 		    if [ $RESULT ]; then
+				espeak "The database exist, choose another name for database"
 		   		echo "The Database exist, choose another name for database."
 		    else
 		        a=2
@@ -188,14 +198,17 @@ Database()
 	 $mysqlbash "create database $db_name "      
 
 	 # a new database is created
+	 espeak "Enter Y for the demo database and N for new database"
 	 echo ""
 	 echo ""
-	 echo "enter 'Y' for the demo database & 'N' for new database " 
+	 echo "enter 'Y' for the demo database & 'N' for new database "
+	 espeak "Note: prefer to use demon database" 
 	 read -p "Note:Prefer to use demo database:" db_yesno
 
 	 
 	 if [ $db_yesno = y ] || [ $db_yesno = Y ]; then
 		 clear
+		 echo "welcome to automation world"
 		 echo -e "\v\v\v\v\v\t\t\t\t\t::::::::::WELCOME TO " \
 				 "AUTOMATION WORLD:::::::::::"            		 
 	 	 # this imports demo.sql to the database defined by the user
@@ -213,7 +226,8 @@ Database()
 		   
 			#creates a blank database for use, using django commands		    
 			python Automation/manage.py syncdb
-			clear
+			clear	
+			espeak "welcome to automation world"
 			echo -e "\v\v\v\v\v\t\t\t\t\t::::::::::WELCOME TO" \
 					"AUTOMATION WORLD:::::::::::"                   
 	 		
