@@ -208,7 +208,7 @@ Database()
 	 
 	 if [ $db_yesno = y ] || [ $db_yesno = Y ]; then
 		 clear
-		 echo "welcome to automation world"
+		 espeak "welcome to automation world"
 		 echo -e "\v\v\v\v\v\t\t\t\t\t::::::::::WELCOME TO " \
 				 "AUTOMATION WORLD:::::::::::"            		 
 	 	 # this imports demo.sql to the database defined by the user
