@@ -67,12 +67,12 @@ Backup()	#backs up important files
 	}
 
 Browser() #open firefox browser at localhost/automation
-	{
-		firefox http://localhost/automation/
-	    Thanks
+	{	
 		rm -rf Django-1.4.2.tar.gz
 		rm -rf Django-1.4.2
 		rm -rf other_files
+		firefox http://localhost/automation/
+	    Thanks		
 	}
 
 

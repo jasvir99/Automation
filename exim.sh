@@ -34,7 +34,7 @@ Get_values() #this function ask user to enter configurations of exim
 
 Configure() #Function to configure exim server 
 	{
-		echo "\v\v Get ready to configure Exim server, for configuration "\
+		echo -e "\v\v Get ready to configure Exim server, for configuration "\
 			 "help, please read 'eximconfig' file."
 		sleep 5s
 		dpkg-reconfigure exim4-config
