@@ -11,7 +11,7 @@
 #                                                                      #
 #      created : 11-July-2013                                          #
 #      last update : 12-July-2013                                      #
-#      VERSION=1.4.2                                                   #
+#      VERSION=1.5.2                                                   #
 #                                                                      #
 ########################################################################
 
@@ -68,8 +68,8 @@ Backup()	#backs up important files
 
 Browser() #open firefox browser at localhost/automation
 	{	
-		rm -rf Django-1.4.2.tar.gz
-		rm -rf Django-1.4.2
+		rm -rf Django-1.5.2.tar.gz
+		rm -rf Django-1.5.2
 		rm -rf other_files
 		firefox http://localhost/automation/
 	    Thanks		
@@ -284,23 +284,23 @@ Install()  #Calls other functions
 	   Browser 
 	}
 
-Install_django()	#Installs django 1.4.2 if it is not installed.
+Install_django()	#Installs django 1.5.2 if it is not installed.
 	{
 
 	result=$(python -c "import django; print(django.get_version())")
-	if  [ $result = 1.4.2 ]; then
-			  echo "Django 1.4.2 is already installed"
+	if  [ $result = 1.5.2 ]; then
+			  echo "Django 1.5.2 is already installed"
 			  Install
 	else
-			  echo "Django 1.4.2 is currently not installed"
+			  echo "Django 1.5.2 is currently not installed"
 			  echo "You want to install it now: (y for yes, " \
 			       "continue otherwise):"
 			  read Y
 		      if [ $Y = y ] || [ $Y = Y ]
 			  then
-			wget http://www.djangoproject.com/m/releases/1.4/Django-1.4.2.tar.gz     
-				tar xzvf Django-1.4.2.tar.gz                                            
-			cd Django-1.4.2                                                           
+			  wget https://www.djangoproject.com/m/releases/1.5/Django-1.5.2.tar.gz     
+					tar xzvf Django-1.5.2.tar.gz                                            
+					cd Django-1.5.2                                                                 
 					python setup.py install
 					pip install django-registration
 					pip install django-tagging
@@ -309,7 +309,7 @@ Install_django()	#Installs django 1.4.2 if it is not installed.
 					cd ../
 					Install
 			 else
-					echo "You have not installed Django 1.4.2"
+					echo "You have not installed Django 1.5.2"
 					pip install django-registration
 					pip install django-tagging
 					pip install python-mysql
