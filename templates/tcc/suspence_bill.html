@@ -20,7 +20,7 @@
 Agency: {{add.client__client__company}}
 {% endif %}{% endfor %}
 <br/><br/>
-Ref : Your Letter No. {% for letter in getjob %}{{letter.letter_no}}{% if not forloop.last %},{% endif %} {% endfor %} dated {% for letter in getjob %}{{letter.letter_date}}{% if not forloop.last %}, {% endif %}{% endfor %} respectively.
+Ref : Your Letter No. {% for letter in getjob %}{{letter.letter_no}}{% if not forloop.last %},{% endif %} {% endfor %} dated {% for letter in getjob %}{{letter.letter_date}}{% if not forloop.last %}, {% endif %}{% endfor %}.
 </div>
 Site : {% for add in getjob %}{{ add.site}} {% endfor %}
 <div align= "left">
@@ -48,15 +48,41 @@ Site : {% for add in getjob %}{{ add.site}} {% endfor %}
 						{{comments.name}}
 					{% endif %}
 				{% endfor %}
+
 				{{material.clientjob__material__name}}
+
+				{% for tests in testname %}
+			{% if material.clientjob__material__id == tests.clientjob__test__material %}
+				 
+	
+					{{tests.clientjob__test__name}}
+					{% if not forloop.last %},
+						{% else %} 
+					{% endif %}
+
+			{% endif %}
+		{% endfor %}
 			{% else %} 
 				{% for comments in matcomment %}
 					{% if comments.id == material.suspencejob__field__matcomment_id %}
 						{{comments.name}}
 					{% endif %}
 				{% endfor %}
+
 				{{material.suspencejob__field__name}}
-				
+				{% for tests in testname %}
+
+			{% if material.suspencejob__field__id == tests.suspencejob__test__material %}
+				 
+	
+					{{tests.suspencejob__test__name}}
+					{% if not forloop.last %},
+						{% else %} 
+					{% endif %}
+
+			{% endif %}
+		{% endfor %}
+
 			{% endif %}
 			
 			</td>
@@ -71,10 +97,12 @@ Site : {% for add in getjob %}{{ add.site}} {% endfor %}
 		{% elif material.suspencejob__field__name == "Survey" or material.clientjob__material__name == "Structural Design (OHSR)" %}
 		work/s
 		{% elif material.clientjob__material__name == "Mix Design" or material.clientjob__material__name == "Structural Design(Building)" or material.suspencejob__field__name == "Hammer" %}
-		No.
+		No./s
+		{% elif material.suspencejob__field__name == "Structural Design"  %}
+		No./s
 		
 		{% else %}
-		 sample/s 
+		 No./s 
 		{% endif %}
 		</td>
 
@@ -135,6 +163,6 @@ Site : {% for add in getjob %}{{ add.site}} {% endfor %}
 		</tr>	
 	</table>
 
-<div style="position:absolute;right:50px;top:800px;">DEAN TESTING AND CONSULTANCY</div>
+<div style="position:absolute;right:50px;top:1000px;">DEAN TESTING AND CONSULTANCY</div>
 </body>
 </html>

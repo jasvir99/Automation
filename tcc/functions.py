@@ -111,7 +111,7 @@ def months(month):
 	
 def normalize_query(query_string,
 	findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
-                    normspace=re.compile(r'(\s{2,})').sub):
+                    normspace=re.compile(r'\s{2,}').sub):
     ''' Splits the query string in invidual keywords, getting rid of unecessary spaces
         and grouping quoted words together.
         Example:
@@ -144,19 +144,5 @@ def get_query(query_string, search_fields):
     return query
 
 	
-def search_func(name):
-	"""Get the soundex code for the string"""
-	name = name.upper() 
-	soundex = "" 
-	soundex += name[0] 
-	dictionary = {"BFPV": "1", "CGJKQSXZ":"2", "DT":"3", "L":"4", "MN":"5", "R":"6", "AEIOUHWY":"."} 
-	for char in name[1:]: 
-		for key in dictionary.keys(): 
-			if char in key: 
-				code = dictionary[key] 
-				if code != soundex[-1]:
-					soundex += code 
-	soundex = soundex.replace(".", "")
-	soundex = soundex[:4].ljust(4, "0") 	
-	return  soundex
+
 	

@@ -6,7 +6,7 @@
 <div style="font-size:24px" align='center'>{{title.name}}</div>
 <div style="font-size:14px" align='center'>{{address.address}}</div>
 <div style="font-size:14px" align='center'><i>Website :</i> {{title.url}}  <i>Email 
-:</i> {{title.url}}  <i>Ph :</i> {{title.phone}}  <i>Fax :</i> {{title.faxno}}</div><br><br>
+:</i> {{title.email_1}}  <i>Ph :</i> {{title.phone}}  <i>Fax :</i> {{title.faxno}}</div><br><br>
 <div align='left'>STC No. AAATN1978LSD001<br>PAN No. AAATN1978L</div>
 <br>
 <body>
@@ -140,7 +140,7 @@ Site : {% for add in getjob %}{{ add.site}} {% endfor %}
 	</table>
 	<br/>
 	<b>Note :</b>
-{% for value in getadd %}\
+{% for value in getadd %}
 {% if value.note != NULL and value.note != "NULL" %}
 	<ol>
 	<li>Payment may be made vide D.D./Cash/Online in favour of Director, Guru Nanak Dev Engg. College, Ludhiana.</li>

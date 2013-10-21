@@ -356,8 +356,6 @@ class EditJob(models.Model):
 	letter_date = models.DateField( max_length=200, null=True, blank=True)
 	tds = models.IntegerField(default="0")
 	discount = models.IntegerField(default="0")
-	note = models.CharField(max_length=600)
-
 	def __unicode__(self):
           return self.id()
 
@@ -551,7 +549,7 @@ class TestTotal(models.Model):
 	
 	""" 
 	job = models.ForeignKey(Job, unique=True)
-	unit_price = models.IntegerField(blank=True)
+	unit_price = models.IntegerField(blank=True,null=True)
 		
 	def __unicode__(self):
         	return self.id
@@ -768,9 +766,9 @@ class Suspence(models.Model):
 	car_taxi_charge = models.IntegerField( blank=True, null=True)
 	lab_testing_staff = models.CharField( max_length=90,blank=True)
 	field_testing_staff =models.CharField( max_length=90,blank=True)
-	test_date = models.DateField( blank=True, null=True)
+	test_date = models.CharField( max_length=500, blank=True, null=True)
 	suspence_bill_no = models.IntegerField( blank=True, null=True)
-
+	clear_date=models.CharField(max_length=30)
 
 class SuspenceForm(ModelForm):
 	"""
@@ -884,7 +882,7 @@ class Transport(models.Model):
 	bill_no = models.IntegerField(null=True, editable=False)
 	kilometer = models.CharField(max_length=150, default="00, 00, 00")
 	#rate = models.IntegerField(default='4')
-	amounts = models.CharField(max_length=180, blank=True,editable=False)
+	amounts = models.CharField(max_length=500, blank=True,editable=False)
 	total = models.IntegerField(blank=True, null=True , editable=False)
 	date = models.DateField(default=datetime.date.today())
 	test_date = models.CharField(max_length=300, default="0000-00-00,\

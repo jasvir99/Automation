@@ -6,7 +6,7 @@ It is the interface between the user interface, urls and database.
 """
 
 from Automation.tcc.header import *
-
+from datetime import datetime
 
 def index1(request):
 	'''
@@ -92,6 +92,7 @@ def edit_profile(request):
 		return render_to_response('tcc/client.html',dict(x.items() + 
 		tmp.items()), context_instance = RequestContext(request))
 	
+@login_required
 def profile(request):
 	"""
 	** profile **
@@ -126,19 +127,9 @@ def profile(request):
 			middle_name, last_name = last_name, company = company, 
 			address = address, city = city, pin_code = pin_code, state 
 			= state, website = website, contact_no = contact_no, 
-			type_of_organisation = type_of_organisation, user = user)
+			type_of_organisation = 
+	type_of_organisation, user = user)
 			pro.save()
-			soundex_fname = search_func(first_name)   # Added.....
-			soundex_mname = search_func(middle_name)
-			soundex_lname = search_func(last_name)
-			soundex_company = search_func(company)
-			soundex_address = search_func(address)
-			soundex_city = search_func(city)
-			sound = Soundexsearch(soundex_fname = soundex_fname, soundex_mname =  # Added.....
-			soundex_mname, soundex_lname = soundex_lname, soundex_address = 
-			soundex_address, soundex_company = soundex_company, soundex_city =
-			soundex_city)
-			sound.save()
 			id = UserProfile.objects.aggregate(Max('id'))
 			maxid =id['id__max']	
 			x = {'form': form,'maxid':maxid,}	
@@ -173,7 +164,7 @@ def non_payment_job(request):
 	else:
 		maxid = maxid + 1
 	user = UserProfile.objects.get(id=request.GET['id'])
-	id = request.GET['id']
+	id=request.GET['id']
 	if request.method == 'POST':
 		form = NonPaymentJobForm(request.POST)
 		if form.is_valid():
@@ -182,7 +173,7 @@ def non_payment_job(request):
 			profile.job_no = maxid
 			profile.save()
 			form.save_m2m()
-			x = {'form': form,'user': id}		
+			x = {'form': form, 'user': id}		
 			return render_to_response('tcc/nonpayment_job_ok.html',
 			dict(x.items() + tmp.items()), context_instance=
 			RequestContext(request))
@@ -770,7 +761,7 @@ def job_submit(request):
 	addid =add['id__max']
 	more = Clientadd.objects.get(id=addid)
 	moremat = more.client_id
-	temp = {'value':value,'moremat':moremat,'jobno'
+	temp = {'clients':clients,'value':value,'moremat':moremat,'jobno'
 	:jobno}
 	return render_to_response('tcc/job_submit.html',dict(temp.items() + 
 	tmp.items()), context_instance=RequestContext(request))
@@ -789,7 +780,7 @@ def job_ok(request):
 	id = Job.objects.aggregate(Max('job_no'))
 	maxid =id['job_no__max']
 	job_no = maxid
-	value =	Job.objects.values_list('testtotal__unit_price',flat=True)\
+	value =Job.objects.values_list('testtotal__unit_price',flat=True)\
 	.filter(job_no=maxid)
 	price = sum(value)
 	from Automation.tcc.variable import *
@@ -868,7 +859,7 @@ def get_documents(request):
 		return render_to_response('tcc/client_job_ok.html',dict(temp.\
 		items() + tmp.items()), context_instance=RequestContext(request))
 		
-@login_required
+#@login_required
 def bill(request):
 	"""
 	** bill **
@@ -929,7 +920,58 @@ def bill(request):
 		template.items() + tmp.items()), context_instance = 
 		RequestContext(request))
 
-@login_required
+def suspence_bill(request):
+	try :
+		job =Job.objects.get(id=request.GET['id'])
+	except Exception:
+		id = Job.objects.aggregate(Max('id'))
+		maxid =id['id__max']
+		job = Job.objects.get(id = maxid)
+	jobid = job.id
+	job_no = job.job_no
+	job_date =job.date
+	getjob = Job.objects.all().filter(job_no=job_no).values(
+	'clientjob__material__name','date','testtotal__unit_price','site',
+	'suspencejob__field__name','report_type', 
+	'clientjob__material__matcomment_id','suspencejob__field__matcomment_id',
+	'sample','letter_no','letter_date', 'suspencejob__other',
+	'clientjob__material__id','suspencejob__field__id').distinct()
+	testname = Job.objects.all().filter(job_no=job_no).values(
+	'clientjob__test__name','clientjob__test__material',
+	'suspencejob__test__material','suspencejob__test__name' ).distinct()
+	gettest = Job.objects.all().filter(job_no=job_no).values(
+	'clientjob__material__test__name','clientjob__material__id',
+	'clientjob__material__test__name')
+	getadd = Job.objects.all().filter(id = jobid).values(
+	'client__client__first_name', 'client__client__middle_name', 
+	'client__client__last_name','client__client__address', 
+	'client__client__city', 'client__client__company',
+	'client__client__state','site',).distinct()
+	from Automation.tcc.variable import *
+	bill = Bill.objects.get(job_no=job_no)
+	matcomment= MatComment.objects.all()
+	servicetaxprint = servicetaxprint
+	educationtaxprint = educationtaxprint
+	highereducationtaxprint = highereducationtaxprint
+	net_total1 = bill.net_total
+	from Automation.tcc.convert_function import *
+	net_total_eng = num2eng(net_total1)
+	template = {'job_no': job_no ,'net_total_eng':net_total_eng,
+	'servicetaxprint':servicetaxprint,'highereducationtaxprint':
+	highereducationtaxprint,'educationtaxprint':educationtaxprint,
+	'bill':bill, 'job' : job, 'net_total1' : net_total1, 'getjob' : 
+	getjob, 'getadd' : getadd,'job_date':job_date,'gettest':gettest,
+	'testname':testname,'matcomment':matcomment}
+	amtid = Amount.objects.aggregate(Max('id'))
+	amtmaxid =amtid['id__max']
+	amt = Amount.objects.get(job_id = jobid)
+	if amt.report_type == "General_report" :
+		return render_to_response('tcc/bill.html', dict(template.\
+		items() + tmp.items()), context_instance = RequestContext(request))
+	else :
+		return render_to_response('tcc/suspence_bill1.html', dict(\
+		template.items() + tmp.items()), context_instance = RequestContext(request))
+
 def receipt_report(request):
 	"""
 	** receipt_report **
@@ -963,7 +1005,7 @@ def receipt_report(request):
 	return render_to_response('tcc/receipt.html',  dict(template.\
 	items() + tmp.items()), context_instance = RequestContext(request))
 	
-@login_required
+#@login_required
 def additional(request):
 	"""
 	** additional **
@@ -987,7 +1029,7 @@ def additional(request):
 	return render_to_response('tcc/additional.html',dict(template.items() + tmp.items()), 
 	context_instance = RequestContext(request))
 		
-@login_required
+#@login_required
 def s_report(request):
 	"""
 	** s_report **
@@ -1043,7 +1085,7 @@ def g_report(request):
 	return render_to_response('tcc/get_report.html',dict(temp.items() + 
 	tmp.items()), context_instance=RequestContext(request))	
 	
-@login_required	
+#@login_required	
 def rep(request):
 	"""
 	** rep **
@@ -1138,10 +1180,10 @@ def transport_bill(request):
 	Transport Bill Function generates transport Bill
 	"""
 	transport_old = Transport.objects.get(job_no=request.GET['job_no'])
-	job = Job.objects.get(job_no=request.GET['job_no'])
+	job = Job.objects.get(id=request.GET['job_no'])
 	client = Job.objects.filter(job_no =
 	job.job_no).values('client__client__first_name',
-	'client__client__middle_name', 'client__client__last_name')
+	'client__client__middle_name', 'client__client__last_name','client__client__address','client__client__city')
 	kilometer = transport_old.kilometer
 	temp = [0,0,0,0,0,0,0,0,0,0]
 	range = kilometer.split(',')
@@ -1160,16 +1202,18 @@ def transport_bill(request):
 	amount8 = int(temp[7])*rate
 	amount9 = int(temp[8])*rate
 	amount10 = int(temp[9])*rate
-	total = amount1 + amount2 + amount3 + amount4 + amount5 + amount6 
-	+ amount7 + amount8 + amount9 + amount10
+	total = amount1 + amount2 + amount3 + amount4 + amount5 + amount6 + amount7 + amount8 + amount9 + amount10
+	
 	all_amounts = amount1,amount2,amount3,amount4,amount5,amount6,
 	amount7,amount8,amount9,amount10
+	net_balance_eng = num2eng(total)
 	Transport.objects.filter(job_no = transport_old.job_no).update(\
 	total = total, amounts = all_amounts )
 	transport = Transport.objects.get(job_no=transport_old.job_no)
-	template ={'transport':transport, 'rate':rate, 'client':client, }
+	template ={'transport':transport, 'rate':rate, 'client':client, 'net_balance_eng':net_balance_eng,}
 	return render_to_response('tcc/transportbill.html',dict(template.\
 	items() + tmp.items()) , context_instance=RequestContext(request))
+
 
 @login_required
 def ta_da(request):
@@ -1206,7 +1250,8 @@ def ta_da(request):
 def tada_view(request):
 	"""
 	** tada_view **
-	Tada_view function confirms that tada is saved.
+	Tada_view function confirms that tada is saved.', '')
+	try :
 	"""
 	id = TaDa.objects.aggregate(Max('id'))
 	maxid =id['id__max']
@@ -1214,6 +1259,17 @@ def tada_view(request):
 	data = {'tada':tada }			
 	return render_to_response('tcc/tada_ok.html', dict(data.items() + 
 	tmp.items()), context_instance=RequestContext(request))
+
+def search_tadasuspence(request):
+	query = request.GET.get('q', '')
+	if query :
+		results = TaDa.objects.filter(job = query).values()
+		
+	else:
+		results = []
+	
+	temp = {"results": results,"query": query,}
+	return render_to_response("tcc/search_tadasuspence.html", dict(temp.items() + tmp.items()), context_instance=RequestContext(request) )
 
 def ta_da_bill(request):
 	"""
@@ -1225,7 +1281,7 @@ def ta_da_bill(request):
 	GET['test_date'])
 	job = Job.objects.get(id=request.GET['job'])
 	c = job.id
-	client = Job.objects.filter(id=c).values('client__client__first_name')
+	client = Job.objects.filter(id=c).values('client__client__first_name','client__client__address','client__client__city')
 	lab_staff = tada.testing_staff_code
         t1=0
         temp = [0,0,0,0,0,0,0,0,0,0]
@@ -1254,12 +1310,21 @@ def ta_da_bill(request):
 	Q(code=amount6) | Q(code=amount7)| Q(code=amount8)| Q(code=amount9) 
 	| Q(code=amount10)).aggregate(Sum('daily_income'))
 	daily = int(daily_income['daily_income__sum']) 
+	net_balance_eng = num2eng(daily)
 	TaDa.objects.filter(job = tada.job).update( tada_amount = daily )
 	data = {'tada':tada,'job':job,'staff':staff,  'daily':daily,
-	'client':client}
+	'client':client,'net_balance_eng':net_balance_eng}
 	return render_to_response('tcc/ta_da_bill.html', data , 
 	context_instance = RequestContext(request))
 
+def search_transport(request):
+	query = request.GET.get('q', '')
+	if query :
+		results = Transport.objects.filter(job_no = query).values()
+	else:
+		results = []
+	temp = {"results": results,"query": query,}
+	return render_to_response("tcc/search_transport.html", dict(temp.items() + tmp.items()), context_instance=RequestContext(request) )
 def distance(request):
 	"""
 	** distance **
@@ -1333,17 +1398,20 @@ def suspence_clearance(request):
 			boring_charge_internal=cd['boring_charge_internal']
 			lab_testing_staff=cd['lab_testing_staff']
 			field_testing_staff =cd['field_testing_staff']
+			test_date =cd['test_date']
+			clear_date = cd['clear_date']
 			job =query
 			Suspence.objects.filter(job = job).update(labour_charge = 
 			labour_charge, boring_charge_external=boring_charge_external, 
 			boring_charge_internal = boring_charge_internal, 
 			field_testing_staff = field_testing_staff, car_taxi_charge 
-			= car_taxi_charge, lab_testing_staff = lab_testing_staff)
+			= car_taxi_charge, lab_testing_staff = lab_testing_staff, test_date = test_date,
+		 	clear_date = clear_date)
 			data = {'job_no' : job, 'labour_charge':labour_charge, 
 			'boring_charge_external' : boring_charge_external,
 			'boring_charge_internal' : boring_charge_internal, 
 			'car_taxi_charge' : car_taxi_charge, 'lab_testing_staff' : 
-			lab_testing_staff, 'sus':sus,}
+			lab_testing_staff, 'sus':sus,'test_date':test_date}
 			return render_to_response('tcc/suspence_clearence_ok.html', 
 			dict(data.items() + tmp.items()), context_instance=
 			RequestContext(request))
@@ -1364,12 +1432,11 @@ def search_new(request):
 	if ('q' in request.GET) and request.GET['q'].strip():
 		query_string = request.GET['q']
 		entry_query = get_query(query_string, ['first_name', 'middle_name',
-		'last_name', 'address','city'])
+	'last_name', 'address','city'])
 		found_entries = UserProfile.objects.filter(entry_query).order_by('date')
-        temp ={ 'query_string': query_string, 'found_entries': found_entries }
-        return render_to_response('tcc/search_results.html',
-    dict(temp.items() + tmp.items()), context_instance=
-    RequestContext(request))
+	temp = { 'query_string': query_string, 'found_entries': found_entries }
+	return render_to_response('tcc/search_results.html', dict(temp.items() + tmp.items()), context_instance=
+	RequestContext(request))
                           
 @login_required
 def search(request):
@@ -1408,19 +1475,35 @@ def other_charge(request):
 	job = Job.objects.filter(id=client.id).values('client__client__first_name',
 	'client__client__middle_name','client__client__last_name',
 	'client__client__address','client__client__city')
-	transport = Transport.objects.get(job_no=client.job_no)
+#	transport = Transport.objects.get(job_no=client.id)
 	amount = Amount.objects.get(job=request.GET['job_no'])
 	suspence = Suspence.objects.get(job=request.GET['job_no'])
-	tada = TaDa.objects.get(job=request.GET['job_no'])
-	tada_sum = tada.tada_amount
-	total = tada_sum + suspence.labour_charge + suspence.car_taxi_charge
-	+ suspence.boring_charge_external + transport.total
+	try:
+		#tada = TaDa.objects.get(job=request.GET['job_no'])
+		#tada_sum = tada.tada_amount
+		
+			tada = Job.objects.get(id=request.GET['job_no'])
+			tada_amount = TaDa.objects.values_list('tada_amount' , flat=True).filter(job_id=tada.id)
+			tada_sum = sum(tada_amount)
+	except Exception:
+		tada= []
+		tada_sum = 0
+	try:  
+		transport = Transport.objects.get(job_no=client.id)                                                                              
+		total = tada_sum + suspence.labour_charge + suspence.car_taxi_charge \
+		+ suspence.boring_charge_external + transport.total
+		other =suspence.labour_charge+suspence.car_taxi_charge \
+		+ suspence.boring_charge_external + transport.total
+	except Exception:
+		transport = []
+		total = tada_sum + suspence.labour_charge + suspence.car_taxi_charge \
+		+ suspence.boring_charge_external
+		other =suspence.labour_charge+suspence.car_taxi_charge \
+		+ suspence.boring_charge_external
 	total_temp =tada_sum+suspence.labour_charge+suspence.car_taxi_charge
 	+ suspence.boring_charge_external
-	other =suspence.labour_charge+suspence.car_taxi_charge
-	+ suspence.boring_charge_external + transport.total
-	temp = {'transport' : transport, 'client' :client, 'amount': amount, 	'suspence':suspence,'tada_sum':tada_sum,'total_temp': total_temp, 
-	'total' :total, 'other':other,'job':job}
+	total_final = other + tada_sum
+	temp = {'transport' : transport, 'client' :client, 'amount': amount, 	'suspence':suspence,'tada_sum':tada_sum,'total_temp': total_temp, 'total' :total, 'other':other,'job':job, 'total_final':total_final}
 	return render_to_response('tcc/other_charge_report.html', 
 	dict(temp.items() + 
 tmp.items()), context_instance=RequestContext(request))
@@ -1445,8 +1528,8 @@ def suspence_clearence_report(request):
 	client =Job.objects.get(id=request.GET['job_no'])
 	clientname = Job.objects.filter(id=client.id).values(\
 	'client__client__first_name','client__client__middle_name',
-	'client__client__last_name','client__client__address',
-	'client__client__city',	'suspencejob__field__name')
+	'client__client__last_name','client__client__address', 'report_type',
+	'client__client__city',	'suspencejob__field__name', 'clientjob__material__name')
 	lab_staff = suspence.lab_testing_staff
         t1=0
         temp = [0,0,0,0,0,0,0,0,0,0]
@@ -1536,8 +1619,8 @@ def suspence_clearence_report_transport(request):
 	client =Job.objects.get(id=request.GET['job_no'])
 	clientname = Job.objects.filter(id=client.id).values(\
 	'client__client__first_name','client__client__middle_name',
-	'client__client__last_name','client__client__address',
-	'client__client__city',	'suspencejob__field__name')
+	'client__client__last_name','client__client__address', 'report_type',
+	'client__client__city',	'suspencejob__field__name', 'clientjob__material__name')
 	lab_staff = suspence.lab_testing_staff
         t1=0
         temp = [0,0,0,0,0,0,0,0,0,0]
@@ -1581,49 +1664,98 @@ def suspence_clearence_report_transport(request):
 	amounts3) | Q(code=amounts4) | Q(code=amounts5) | Q(code=amounts6) 
 	| Q(code=amounts7)| Q(code=amounts8)| Q(code=amounts9) | Q(code=
 	amounts10)).order_by('id')
+	testtotal= TestTotal.objects.get(job=request.GET['job_no'])                 #added for taking the amount of trans_total
+	bill = Bill.objects.get(job_no=client.job_no)
+	trans_total=bill.trans_total                                                #which will be added to testtoal_unit_price further.
+	tried = testtotal.unit_price + bill.trans_total	               
+	num_balance_eng = num2eng(testtotal.unit_price)
 	try :
-		transport=Tranport.objects.get(job=request.GET['job_no'])
+		transport=Transport.objects.get(job_no=client.id)
 		tempr = suspence.labour_charge+transport.total+suspence.\
 		boring_charge_external+suspence.car_taxi_charge
 	except Exception :
-		tempr = suspence.labour_charge + suspence.rate + suspence.\
-		boring_charge_external + suspence.car_taxi_charge
-	try :
-		tada = TaDa.objects.get(job=request.GET['job_no'])
-		balance= amount.unit_price - (tada.tada_amount + tempr + suspence.boring_charge_internal)
-		tada_sum = tada.tada_amount
-	except Exception :
-		tada =[]
-		balance= amount.unit_price - (tempr + suspence.boring_charge_internal)
-		tada_sum =0
-	from Automation.tcc.variable import *
-	work_charge = round(workcharge * balance / 100.00)
-	college_income = round(collegeincome * balance / 100.00)
-	admin_charge = round(admincharge * balance / 100.00)
-	balance_temp = balance - college_income - admin_charge -work_charge
-	ratio1 = ratio1(con_type)
-	ratio2 = ratio2(con_type)
-	consultancy_asst = round(ratio1 * balance_temp / 100)
-	development_fund = round(ratio2 * balance_temp / 100)
-	net_total1 = amount.unit_price
-	net_balance_eng = num2eng(net_total1)
-	retrieve()
-	Suspence.objects.filter(job = client).update( work_charge = 
-	work_charge)
-	Amount.objects.filter(job = client).update( college_income = 
-	college_income, admin_charge = admin_charge, consultancy_asst = 
-	consultancy_asst, development_fund = development_fund )
-	data = {'transport' : transport, 'net_balance_eng' : 
-	net_balance_eng, 'teachers' : staff, 'servicetaxprint' : 
-	servicetaxprint, 'highereducationtaxprint':highereducationtaxprint, 
-	'educationtaxprint' : educationtaxprint, 'ratio1' : ratio1, 
-	'job_no' :client.job_no , 'ratio2' : ratio2, 'other' : tempr, 
-	'collegeincome' : collegeincome, 'admincharge' : admincharge, 
-	'client' : client, 'amount' : amount, 'suspence' : suspence, 
-	'clientname' : clientname, 'tada_sum':tada_sum,'con_type':con_type}
-	return render_to_response('tcc/suspence_clearence_report_transport.html',
-	dict(data.items() + tmp.items()) , context_instance=
-	RequestContext(request))
+		tempr = suspence.labour_charge + suspence.boring_charge_external + suspence.car_taxi_charge
+	if request.GET['val']:                                            #done for getting total with and without tranportation charges
+		try :
+			tada = Job.objects.get(id=request.GET['job_no'])
+		
+			tada_amount = TaDa.objects.values_list('tada_amount' , flat=True).filter(job_id=tada.id)
+			tada_sum = sum(tada_amount)
+			balance= testtotal.unit_price - (tada_sum + tempr + suspence.boring_charge_internal)
+		except Exception :
+			tada =[]
+			balance= testtotal.unit_price - (tempr + suspence.boring_charge_internal)
+			tada_sum =0
+		from Automation.tcc.variable import *
+		work_charge = round(workcharge * balance / 100.00)
+		college_income = round(collegeincome * balance / 100.00)
+		admin_charge = round(admincharge * balance / 100.00)
+		balance_temp = balance - college_income - admin_charge -work_charge
+		ratio1 = ratio1(con_type)
+		ratio2 = ratio2(con_type)
+		consultancy_asst = round(ratio1 * balance_temp / 100)
+		development_fund = round(ratio2 * balance_temp / 100)
+		net_total1 = amount.unit_price
+		net_balance_eng = num2eng(net_total1)
+		net_balance_eng = num2eng(tried)                                                                          
+		retrieve()
+		Suspence.objects.filter(job = client).update( work_charge = 
+		work_charge)
+		Amount.objects.filter(job = client).update( college_income = 
+		college_income, admin_charge = admin_charge, consultancy_asst = 
+		consultancy_asst, development_fund = development_fund )
+		data = {'transport' : transport, 'net_balance_eng' :                                              
+		net_balance_eng, 'teachers' : staff, 'servicetaxprint' : 
+		servicetaxprint, 'highereducationtaxprint':highereducationtaxprint, 
+		'educationtaxprint' : educationtaxprint, 'ratio1' : ratio1, 
+		'job_no' :client.job_no , 'ratio2' : ratio2, 'other' : tempr, 
+		'collegeincome' : collegeincome, 'admincharge' : admincharge, 
+		'client' : client, 'amount' : amount, 'suspence' : suspence, 
+		'clientname' : clientname, 'tada_sum':tada_sum,'con_type':con_type,\
+		'trans_total':trans_total,'tried':tried,'testtotal':testtotal,'num_balance_eng':num_balance_eng}		
+		return render_to_response('tcc/suspence_clearence_report_without_transport.html',
+		dict(data.items() + tmp.items()) , context_instance=
+		RequestContext(request))
+	else:
+		try :
+			tada = Job.objects.get(id=request.GET['job_no'])
+			tada_amount = TaDa.objects.values_list('tada_amount' , flat=True).filter(job_id=tada.id)
+			tada_sum = sum(tada_amount)
+			balance= tried - (tada_sum + tempr + suspence.boring_charge_internal)
+		except Exception :
+			tada =[]
+			balance= tried - (tempr + suspence.boring_charge_internal)
+			tada_sum = 0
+		from Automation.tcc.variable import *
+		work_charge = round(workcharge * balance / 100.00)
+		college_income = round(collegeincome * balance / 100.00)
+		admin_charge = round(admincharge * balance / 100.00)
+		balance_temp = balance - college_income - admin_charge -work_charge
+		ratio1 = ratio1(con_type)
+		ratio2 = ratio2(con_type)
+		consultancy_asst = round(ratio1 * balance_temp / 100)
+		development_fund = round(ratio2 * balance_temp / 100)
+		net_total1 = amount.unit_price
+		net_balance_eng = num2eng(net_total1)
+		net_balance_eng = num2eng(tried)                                                                          
+		retrieve()
+		Suspence.objects.filter(job = client).update( work_charge = 
+		work_charge)
+		Amount.objects.filter(job = client).update( college_income = 
+		college_income, admin_charge = admin_charge, consultancy_asst = 
+		consultancy_asst, development_fund = development_fund )
+		data = {'transport' : transport, 'net_balance_eng' :                                              
+		net_balance_eng, 'teachers' : staff, 'servicetaxprint' : 
+		servicetaxprint, 'highereducationtaxprint':highereducationtaxprint, 
+		'educationtaxprint' : educationtaxprint, 'ratio1' : ratio1, 
+		'job_no' :client.job_no , 'ratio2' : ratio2, 'other' : tempr, 
+		'collegeincome' : collegeincome, 'admincharge' : admincharge, 
+		'client' : client, 'amount' : amount, 'suspence' : suspence, 
+		'clientname' : clientname, 'tada_sum':tada_sum,'con_type':con_type,\
+		'trans_total':trans_total,'tried':tried,'testtotal':testtotal,'num_balance_eng':num_balance_eng}
+		return render_to_response('tcc/suspence_clearence_report_transport.html',
+		dict(data.items() + tmp.items()) , context_instance=
+		RequestContext(request))
 	
 			
 def prevwork(request):
@@ -1710,56 +1842,38 @@ def registered_user(request):
 	return render_to_response("tcc/registered_user.html", dict(temp.items() + 
 	tmp.items()),context_instance=RequestContext(request))
 
-def letter_staff(request):
+def programme(request):
 	if request.method == 'POST':
-		form = SelStaffForm(request.POST)
+		form = ProgrammeForm(request.POST)
 		if form.is_valid():
-			cd = form.cleaned_data
-        	staff = request.POST.getlist('staff')
-        	profile = form.save(commit=False)
-        	profile.save()
-        	form.save_m2m()
-        	staffmax = SelStaff.objects.aggregate(Max('id'))
+			cd = form.cleaned_data		
+		staff = request.POST.getlist('name')
+		profile = form.save(commit=False)
+       		profile.save()
+       		form.save_m2m()
+		staffmax = Programme.objects.aggregate(Max('id'))
         	staffid =staffmax['id__max']
-        	staff = SelStaff.objects.filter(id=staffid).values('staff__name')
-        	temp = {'form':form,'staff':staff}
-        	return render_to_response('tcc/letterstaff.html',dict(temp.items() + 
-        	tmp.items()),context_instance=RequestContext(request))
+        	staff = Programme.objects.filter(id=staffid).values('staff__name')
+       		#temp = {'form':form,'staff':staff}
+		organisation = Organisation.objects.all()
+		department = Department.objects.all().filter(id = 1)		
+		done = Programme.objects.all().filter(id=staffid).values('client_department_name', 'phone_no', 'on', 'at', 'addr', 			'city', 'site','date') 
+		usermax = Programme.objects.aggregate(Max('id'))
+		userid =usermax['id__max']		
+		name_list = UserProfile.objects.all().filter(id=userid).values('first_name', 'last_name')
+		id = Job.objects.aggregate(Max('id'))
+		maxid =id['id__max']
+		job = Job.objects.get(id = maxid)
+	
+		job_date =job.date
+		amtid = Amount.objects.aggregate(Max('id'))
+		amtmaxid =amtid['id__max']
+		amt = Amount.objects.get(job_id = amtmaxid)
+		template = {'form': form, 'organisation':organisation,'department':department, 'done':done, 'staff':staff}
+		return render_to_response('tcc/report11.html', template, context_instance=RequestContext(request))	
+			
 	else:
-		form = SelStaffForm()
+		form = ProgrammeForm()
 	temp ={'form': form}
 	return render_to_response('tcc/new_client.html',dict(temp.items() + 
 	tmp.items()),context_instance=RequestContext(request))
-
-def Convert(request):
-			first_name = UserProfile.objects.filter(id=1).values('first_name')
-			for first in first_name:
-				first = first_name['first_name']
-				soundex_fname = search_func(first)
-			middle_name = UserProfile.objects.filter(id=1).values('middle_name')
-			for middle in middle_name:
-				middle = middle_name['middle_name']   # Added.....
-				soundex_mname = search_func(middle)
-			last_name = UserProfile.objects.filter(id=1).values('last_name')
-			for last in last_name:
-				last = last_name['last_name']
-				soundex_lname = search_func(last)
-			company = UserProfile.objects.filter(id=1).values('company')
-			for comp in company:
-				comp = company['company']
-				soundex_company = search_func(comp)
-			address = UserProfile.objects.filter(id=1).values('address')
-			for add in address:
-				add = address['address']
-				soundex_address = search_func(add)
-			city = UserProfile.objects.filter(id=1).values('city')
-			for ci in city:
-				ci = city['city']
-				soundex_city = search_func(ci)
-			sound = Soundexsearch(soundex_fname = soundex_fname, soundex_mname =  # Added.....
-			soundex_mname, soundex_lname = soundex_lname, soundex_address = 
-			soundex_address, soundex_company = soundex_company, soundex_city =
-			soundex_city)
-			sound.save()
-			return render_to_response('tcc/ok.html',dict(temp.items() + 
-			tmp.items()),context_instance=RequestContext(request))

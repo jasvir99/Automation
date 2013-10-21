@@ -6,7 +6,7 @@
 <div style="font-size:24px" align='center'>{{title.name}}</div>
 <div style="font-size:14px" align='center'>{{address.address}}</div>
 <div style="font-size:14px" align='center'><i>Website :</i> {{title.url}}  <i>Email 
-:</i> {{title.url}}  <i>Ph :</i> {{title.phone}}  <i>Fax :</i> {{title.faxno}}</div><br><br>
+:</i> {{title.email_1}}  <i>Ph :</i> {{title.phone}}  <i>Fax :</i> {{title.faxno}}</div><br><br>
 <div align='left'>STC No. AAATN1978LSD001<br>PAN No. AAATN1978L</div>
 <br>
 <body>
@@ -73,7 +73,22 @@ Site : {% for add in getjob %}{{ add.site}} {% endfor %}
 			{{comments.name}}
 			{% endif %}
 		{% endfor %}	
+<<<<<<< Updated upstream
+		{{material.suspencejob__field__name}} :
+=======
 		{{material.suspencejob__field__name}}
+>>>>>>> Stashed changes
+		{% for tests in testname %}
+			{% if material.suspencejob__field__id == tests.suspencejob__test__material %}
+				 
+	
+					{{tests.suspencejob__test__name}}
+					{% if not forloop.last %},
+						{% else %} 
+					{% endif %}
+
+			{% endif %}
+		{% endfor %}
 	{% endif %}
 
 			
@@ -89,10 +104,9 @@ Site : {% for add in getjob %}{{ add.site}} {% endfor %}
 		{% elif material.suspencejob__field__name == "Survey" or material.clientjob__material__name == "Structural Design (OHSR)" %}
 		work/s 
 		{% elif material.clientjob__material__name == "Mix Design" or material.clientjob__material__name == "Structural Design(Building)" %}
-		No.
-		
+		No./s
 		{% else %}
-		 sample/s 
+		 sample./s
 		{% endif %}
 		</td>
 
@@ -136,6 +150,6 @@ Site : {% for add in getjob %}{{ add.site}} {% endfor %}
 		</tr>	
 	</table>
 
-<div style="position:absolute;right:50px;top:900px;">DEAN TESTING AND CONSULTANCY</div>
+<div style="position:absolute;right:50px;top:1100px;">DEAN TESTING AND CONSULTANCY</div>
 </body>
 </html>

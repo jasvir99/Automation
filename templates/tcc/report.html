@@ -22,7 +22,7 @@ Agency: {{names.client__client__company}}
 			{{comments.name|lower }}
 			{% endif %}
 		{% endfor %}
-		{% endfor %}{{mat}}. <br/><br/><br/>
+		{% endfor %}{{mate}}. <br/><br/><br/>
 <div >Vide Receipt No. : {{user.job_no }}  Dated: {{user.date}} </div>
 <div >Nature of Consultancy : {{ con_type }},  Ratio {{ ratio1 }}:{{ ratio2 }} </div>
 <div align= "left">
@@ -84,29 +84,7 @@ Agency: {{names.client__client__company}}
 <div align="left">
 Account Clerk (Consultancy)</div>
 <br><br><br>
-<table border="1" width="100%">
-{% if user.id == job.id %}
-<tr>
-			<td>Service Tax:  @ {{ servicetaxprint }}% </td>
-			
-			<td  align="right">{{ bill.service_tax|intcomma }}</td>
-		<tr>
-			<td>Education Cess  @ {{ educationtaxprint }}% </td>
-			
-			<td  align="right">{{ bill.education_tax|intcomma }}</td>
-		</tr>
-		<tr>
-			<td >Higher Education Cess  @ {{ highereducationtaxprint }}% </td>
-			
-			<td  align="right">{{ bill.higher_education_tax|intcomma }}</td>
-		</tr>
-		<tr>
-				<td>Total </td>
-				
-			<td  align="right">{{ bill.net_total|intcomma}}</td>
-		</tr>	
-	</table>
-{% endif %}
+
 </body>
 </html>
 
