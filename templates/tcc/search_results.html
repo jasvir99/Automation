@@ -15,6 +15,7 @@ You searched for "{{ query_string }}" and the results are listed below.
 <table border='1' class="fixed">
 <tr>
 		<th>Sr.No </th>
+		<th> Client Id </th>
 		<th>Name of Parties</th>
                 <th>Address</th>
                 <th>Company</th>
@@ -28,6 +29,7 @@ You searched for "{{ query_string }}" and the results are listed below.
   {% for client in found_entries %}
 	<tr>
 	<td>{{forloop.counter}}</td>
+	<td>{{ client.id }}</td>
         <td> {{ client.first_name }} {{client.middle_name}} {{client.last_name}}</td>
         <td> {{client.address}},{{client.city}}</td>
         <td>{{client.company}}</td>
@@ -40,7 +42,8 @@ You searched for "{{ query_string }}" and the results are listed below.
 	<a href="/automation/tcc/selectfield/?id={{ client.id }}">ADD PERFORMA JOB</a>|
 	<a href="/automation/tcc/nonpayment/?id={{ client.id }}">ADD NON-PAYMENT JOB</a>|
 
-	<a href="/automation/tcc/prevwork/?id={{ client.id }}">View Previous Work</a></td>
+	<a href="/automation/tcc/prevwork/?id={{ client.id }}">View Previous Work</a>|
+	<a href="/automation/tcc/view_profile/?id={{ client.id }}">View Profile</a></td></td>
 	
 	</tr>
       {% endfor %}

@@ -3,12 +3,12 @@ File contains urls of the Report
 """
 from django.conf.urls.defaults import *
 from django.contrib import admin
-from django.views.generic.simple import direct_to_template
+from django.views.generic import TemplateView
 
 """
 Urls of views.py
 """
-urlpatterns = patterns('Automation.report.views',
+urlpatterns = patterns('ofau.report.views',
 	(r'^report/$', 'report'),
 	(r'^chemical_analysis/$', 'chemical_analysis'),
 	(r'^result_chem/$', 'result_chem'),
@@ -60,13 +60,13 @@ urlpatterns = patterns('Automation.report.views',
 #    (r'^result_Drinking_water/$', 'result_Drinking_water'),
 
 
-	(r'thanks$',  direct_to_template, {'template': 'report/thanks.html'}),
+	(r'thanks$',  TemplateView, {'template': 'report/thanks.html'}),
 )
 
 """
 Urls of search.py
 """
-urlpatterns += patterns('Automation.report.search',
+urlpatterns += patterns('ofau.report.search',
 	(r'^search_report/$', 'search_report'),
 	(r'^search/$', 'search'),
 	(r'^report_gen/$', 'report_gen'),
@@ -75,7 +75,7 @@ urlpatterns += patterns('Automation.report.search',
 """
 Urls of pdf.py
 """
-urlpatterns += patterns('Automation.report.pdf',
+urlpatterns += patterns('ofau.report.pdf',
 	(r'^report_pdf/$', 'report_pdf'),
 	(r'^myview/$', 'myview'),
 )

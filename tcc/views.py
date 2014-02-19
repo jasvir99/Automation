@@ -5,8 +5,20 @@ This file is used to create the views for the software.
 It is the interface between the user interface, urls and database.
 """
 
-from Automation.tcc.header import *
+from ofau.tcc.header import *
 from datetime import datetime
+import itertools
+
+from django.views.decorators.cache import patch_cache_control
+from functools import wraps
+def stop_caching(decorated_function):
+    @wraps(decorated_function)
+    def wrapper(*args, **kwargs):
+        response = decorated_function(*args, **kwargs)
+        patch_cache_control(response, no_cache=True, no_store=True,
+                            max_age=0, must_revalidate=True)
+        return response
+    return wrapper
 
 def index1(request):
 	'''
@@ -91,7 +103,38 @@ def edit_profile(request):
 		x = {'form': form,}
 		return render_to_response('tcc/client.html',dict(x.items() + 
 		tmp.items()), context_instance = RequestContext(request))
+
+@login_required
+def view_profile(request):
+	"""
+	** view_profile **
 	
+	This function firstly checks whether the client has already got a
+	profile or not. If it already has, then he is offered an already
+	built profile to edit, however in other case when the profile is
+	not built, client's new profile will be made.
+	"""
+	client = request.GET['id']
+	maxid = UserProfile.objects.get(id = client)
+	if request.method == "POST":
+		form = UserProfileForm(request.POST,instance=maxid)
+		if form.is_valid():
+			pro = form.save(commit=False)
+			pro.user = request.user
+			pro.save()
+			form.save()	
+			x = {'form': form, 'maxid':maxid}
+			return render_to_response('tcc/new_client_ok.html', 
+			dict(x.items() + tmp.items()), context_instance=
+			RequestContext(request))
+	else:	
+		form = UserProfileForm(instance=maxid)
+	x = {'form': form,}
+	return render_to_response('tcc/client.html',dict(x.items() + 
+	tmp.items()), context_instance = RequestContext(request))
+
+@stop_caching	
+@login_required
 @login_required
 def profile(request):
 	"""
@@ -115,20 +158,53 @@ def profile(request):
 			address = cd['address']
 			city = cd['city']
 			pin_code = cd['pin_code']
-			state = cd['state']
+			state = cd['state'] 
 			website = cd['website']
 			contact_no = cd['contact_no']
 			type_of_organisation = cd['type_of_organisation']
+			email_address = cd ['email_address']
 			'''pro = form.save(commit=False)
 			pro.user = request.user
 			pro.save()
 			form.save()'''
-			pro = UserProfile(first_name = first_name, middle_name =
-			middle_name, last_name = last_name, company = company, 
-			address = address, city = city, pin_code = pin_code, state 
+
+			
+			
+			# "K" For implementing phonetic with spaces using python lists.
+			if middle_name == "":
+				if last_name == "":
+					full_name = first_name 
+				else:
+					full_name = first_name + ' ' + last_name
+			elif last_name == "":
+				full_name = first_name + ' ' + middle_name 
+			else:
+				full_name = first_name + ' ' + middle_name + ' ' + last_name #concatenation
+			k = full_name.split() #splitting when space is encountered
+			exist = CodeTable.objects.all()    #fetching all values from CodeTable name
+			lists = [ soundex(x) for x in k ]
+			for x, y in itertools.izip(k, lists):
+				word = x
+				code = y
+				flag = 0  # flag for checking condtion: word already exist
+				for z in exist:
+					if word == z.word:  
+						flag = 1        #set flag=1 if word already exist
+					else:
+						continue
+				if flag == 1:   # if flag is 1 then check next value otherwise generate code
+					continue 
+				else:
+					coded = CodeTable(word = word, code = code)
+					coded.save()  
+				
+
+			pro = UserProfile(first_name = first_name.title(), middle_name =
+			middle_name.title(), last_name = last_name.title(), company = company.title(), 
+			address = address, city = city.title(), pin_code = pin_code, state 
 			= state, website = website, contact_no = contact_no, 
-			type_of_organisation = 
-	type_of_organisation, user = user)
+			type_of_organisation = type_of_organisation, email_address = 
+			email_address, user = user)
 			pro.save()
 			id = UserProfile.objects.aggregate(Max('id'))
 			maxid =id['id__max']	
@@ -148,6 +224,66 @@ def profile(request):
 		form.items()+ tmp.items()), context_instance=
 		RequestContext(request))
 
+def list_search(request):
+	"""
+	**Phonetic search for list values**
+	It is a function which fetches a list entered by user and finds similar
+	matching words from database.
+	"""
+	query_string = ''
+	found_entries =[] 
+	if ('q' in request.GET) and request.GET['q']:
+		query_string = request.GET['q']
+		k = query_string.split()
+		lists = [ soundex(x) for x in k ]
+		B = []
+		
+#"K'		for code in lists:
+#   			words = CodeTable.objects.filter(code=code)
+#  			B.extend([words])	
+#		#for i in range(0, len(B)):
+#		for code in B:
+#				entry_query = get_query(code, ['first_name', 'middle_name'
+#			'last_name', 'address','city'])
+		try: #try block added to handle 'no client found' condition 
+			for code in lists:
+				words = CodeTable.objects.filter(code=code)
+				#code = CodeTable.objects.get(id = words)        
+				#code_word = code.word
+				for value in words:
+					entry = value.word 
+					entry_query = get_query(entry, ['first_name', 'middle_name',
+					'last_name', 'address','city'])
+					entry = UserProfile.objects.filter(entry_query).order_by('date')
+					flag = 0 
+					"""
+					checking if entry aleady exist in found_entries by comparing id
+					"""
+					for entries in entry:
+						for lists in found_entries:
+							for values in lists:
+								if entries.id == values.id:
+									flag = 1
+									break
+								else:
+									continue
+					if flag == 1:
+						continue
+					else:								
+						found_entries.append(entry)
+				
+			"""	entry_query = get_query(code_word, ['first_name', 'middle_name',
+				'last_name', 'address','city'])
+				entry = UserProfile.objects.filter(entry_query).order_by('date')
+				found_entries.append(entry)"""
+		except Exception:
+			found_entries = []
+#	return HttpResponse("You're voting on poll")
+	temp = {'query_string': query_string, 'found_entries' : found_entries}
+	return render_to_response('tcc/list_results.html', dict(temp.items() + tmp.items()),
+	context_instance=RequestContext(request))
+
+@stop_caching
 @login_required
 def non_payment_job(request):
 	"""
@@ -182,7 +318,8 @@ def non_payment_job(request):
 	form = {'form':form, 'maxid':maxid}
 	return render_to_response('tcc/non_payment_job.html',dict(form.\
 	items() + tmp.items()),context_instance=RequestContext(request))
-	
+
+@stop_caching	
 @login_required
 def performa(request):
 	"""
@@ -201,6 +338,7 @@ def performa(request):
 		return render_to_response("tcc/profile_first.html", tmp, 
 		context_instance=RequestContext(request) )
 
+@stop_caching
 @login_required
 def previous(request):
 	"""
@@ -241,6 +379,7 @@ def advanced_payment(request):
 		return render_to_response('tcc/profile_first.html',tmp, context_instance 
 		= RequestContext(request))'''
 
+@stop_caching
 def material(request):
 	"""
 	** material **
@@ -253,6 +392,7 @@ def material(request):
 	return render_to_response('tcc/field.html', tmp, context_instance = 
 	RequestContext(request))
 
+@stop_caching
 def rate(request):
 	"""
 	** rate **
@@ -267,7 +407,8 @@ def rate(request):
 	temp = {'lab':lab,'test':test,'mate':mate,}
 	return render_to_response('tcc/test.html', dict(temp.items() + 
 	tmp.items()),context_instance=RequestContext(request))
-	
+
+@stop_caching	
 @login_required
 def selectfield(request):
 	"""
@@ -304,6 +445,7 @@ def selectfield(request):
 		return render_to_response('tcc/profile_first.html',tmp, 
 		context_instance = RequestContext(request))
 
+@stop_caching
 @login_required
 def select(request):
 	"""
@@ -319,7 +461,7 @@ def select(request):
 	client = Clientadd.objects.get(id=request.GET['client'])
 	clid = client.id
 	report = material.id
-	if report == 3 or report == 4:
+	if report == 3 or report == 4 or report == 6:
 		if request.method=='POST':
 			form1 = AdvancedForm(request.POST)
 			form2 = BillForm(request.POST)
@@ -366,6 +508,7 @@ def select(request):
 		return render_to_response('tcc/tags.html',dict(temp.items() + 
 		tmp.items()),context_instance = RequestContext(request))
 
+@stop_caching
 @login_required
 def add_job(request):
 	"""
@@ -414,9 +557,9 @@ def add_job(request):
 				profile1.save()
 				form2.save_m2m()
 				if profile.report_type == "2":
-					return HttpResponseRedirect(reverse('Automation.tcc.views.add_suspence'))
+					return HttpResponseRedirect(reverse('ofau.tcc.views.add_suspence'))
 				else :
-					return HttpResponseRedirect(reverse('Automation.tcc.views.gen_report'))
+					return HttpResponseRedirect(reverse('ofau.tcc.views.gen_report'))
 		else:	
 			form1 = JobForm()
 			form2 = ClientJobForm()
@@ -457,7 +600,7 @@ def add_job(request):
 				profile1.test = sel_test
 				profile1.save()
 				form2.save_m2m()
-				return HttpResponseRedirect(reverse('Automation.tcc.views.add_suspence'))
+				return HttpResponseRedirect(reverse('ofau.tcc.views.add_suspence'))
 		else:	
 			form1 = JobForm()
 			form2 = SuspenceJobForm()
@@ -466,7 +609,8 @@ def add_job(request):
 			return render_to_response('tcc/add_suspence.html',
 			dict(temp.items() + tmp.items()) , context_instance=
 			RequestContext(request))
-	
+
+@stop_caching	
 @login_required
 def add_job_other_test(request):
 	"""
@@ -525,7 +669,7 @@ def add_job_other_test(request):
 				profile2.job = client
 				profile2.save()
 				form3.save_m2m()
-				return HttpResponseRedirect(reverse('Automation.tcc.views.gen_report_other'))
+				return HttpResponseRedirect(reverse('ofau.tcc.views.gen_report_other'))
 		else:	
 			form1 = JobForm()
 			form2 = ClientJobForm()
@@ -584,7 +728,7 @@ def add_job_other_test(request):
 				profile2.rate = rate
 				profile2.save()
 				form3.save_m2m()
-				return HttpResponseRedirect(reverse('Automation.tcc.views.gen_report_other'))
+				return HttpResponseRedirect(reverse('ofau.tcc.views.gen_report_other'))
 		else:	
 			form1 = JobForm()
 			form2 = SuspenceJobForm()
@@ -593,6 +737,7 @@ def add_job_other_test(request):
 		temp.items() + tmp.items()), context_instance=
 		RequestContext(request))
 
+@stop_caching
 def add_suspence(request):
 	"""
 	** add_suspence **
@@ -633,7 +778,7 @@ def add_suspence(request):
 	site = Distance.objects.get(id=distid)
 	distance = 2*site.sandy
 	report_type = "Suspence" 
-	if distance < 100:
+	if distance < 100 and distance != 0:
 		rate = 1000
 	elif distance == 0:
 		rate = 0
@@ -643,8 +788,9 @@ def add_suspence(request):
 	m.save()
 	amt = Amount(job = job ,unit_price=price,report_type = report_type,)
 	amt.save()
-	return HttpResponseRedirect(reverse('Automation.tcc.views.job_submit'))
+	return HttpResponseRedirect(reverse('ofau.tcc.views.job_submit'))
 
+@stop_caching
 def gen_report(request):
 	"""
 	** gen_report **
@@ -670,7 +816,7 @@ def gen_report(request):
 	p.save()
 	if client.pay == "cash" and client.tds == 0:
 		report_type = "General_report"
-		from Automation.tcc.variable import *
+		from ofau.tcc.variable import *
 		type =clients.material.distribution.name
 		college_income = round(collegeincome * unit_price / 100.00)
 		admin_charge = round(admincharge * unit_price / 100.00)
@@ -691,8 +837,9 @@ def gen_report(request):
 		amt = Amount(job = client ,unit_price=unit_price,report_type 
 		= report_type,)
 		amt.save()
-	return HttpResponseRedirect(reverse('Automation.tcc.views.job_submit'))
-	
+	return HttpResponseRedirect(reverse('ofau.tcc.views.job_submit'))
+
+@stop_caching	
 def gen_report_other(request):
 	"""
 	** gen_report_other **
@@ -714,7 +861,7 @@ def gen_report_other(request):
 	unit_price = testmax_id.unit_price
 	if client.pay == "CASH" and client.tds == 0:
 		report_type = "General_report"
-		from Automation.tcc.variable import *
+		from ofau.tcc.variable import *
 		type =clients.material.distribution.name
 		college_income = round(collegeincome * unit_price / 100.00)
 		admin_charge = round(admincharge * unit_price / 100.00)
@@ -735,8 +882,9 @@ def gen_report_other(request):
 		amt = Amount(job = client ,unit_price=unit_price,report_type 
 		= report_type,)
 		amt.save()
-	return HttpResponseRedirect(reverse('Automation.tcc.views.job_submit'))
+	return HttpResponseRedirect(reverse('ofau.tcc.views.job_submit'))
 
+@stop_caching
 def job_submit(request):
 	"""
 	** job_submit **
@@ -765,7 +913,8 @@ def job_submit(request):
 	:jobno}
 	return render_to_response('tcc/job_submit.html',dict(temp.items() + 
 	tmp.items()), context_instance=RequestContext(request))
-	
+
+@stop_caching	
 @login_required
 def job_ok(request):
 	"""
@@ -783,7 +932,7 @@ def job_ok(request):
 	value =Job.objects.values_list('testtotal__unit_price',flat=True)\
 	.filter(job_no=maxid)
 	price = sum(value)
-	from Automation.tcc.variable import *
+	from ofau.tcc.variable import *
 	try:
 		trans_value = Job.objects.values_list('suspence__rate',flat=\
 		True).filter(job_no=maxid)
@@ -831,12 +980,33 @@ def job_ok(request):
 	temp = {"maxid":maxid,'amt':amt}
 	if request.user.is_staff == 1 and request.user.is_active == 1 and \
 	request.user.is_superuser == 1 :
-		return render_to_response('tcc/job_ok.html', dict(temp.items() + 
-		tmp.items()), context_instance=RequestContext(request))
+		return HttpResponseRedirect('job_ok_show')
 	else :
-		return render_to_response('tcc/client_job_ok.html',dict(temp.\
-		items() + tmp.items()), context_instance=RequestContext(request))
-	
+		return HttpResponseRedirect('client_job_ok_show')
+
+@stop_caching
+def job_ok_show(request):
+	material =request.GET.get('id', '')
+	id = Job.objects.aggregate(Max('job_no'))
+	maxid =id['job_no__max']
+	job_no = maxid
+	amt = Job.objects.filter(job_no=maxid).values('amount__report_type')
+	temp = {"maxid":maxid,'amt':amt}
+	return render_to_response('tcc/job_ok.html',dict(temp.items() + 
+		tmp.items()), context_instance=RequestContext(request))
+
+@stop_caching
+def client_job_ok_show(request):
+	material =request.GET.get('id', '')
+	id = Job.objects.aggregate(Max('job_no'))
+	maxid =id['job_no__max']
+	job_no = maxid
+	amt = Job.objects.filter(job_no=maxid).values('amount__report_type')
+	temp = {"maxid":maxid,'amt':amt}
+	return render_to_response('tcc/client_job_ok.html', dict(temp.items() + 
+		tmp.items()), context_instance=RequestContext(request))
+
+@stop_caching	
 @login_required
 def get_documents(request):
 	"""
@@ -858,7 +1028,8 @@ def get_documents(request):
 	else :
 		return render_to_response('tcc/client_job_ok.html',dict(temp.\
 		items() + tmp.items()), context_instance=RequestContext(request))
-		
+
+@stop_caching		
 #@login_required
 def bill(request):
 	"""
@@ -894,14 +1065,14 @@ def bill(request):
 	'client__client__last_name','client__client__address', 
 	'client__client__city', 'client__client__company',
 	'client__client__state','site',).distinct()
-	from Automation.tcc.variable import *
+	from ofau.tcc.variable import *
 	bill = Bill.objects.get(job_no=job_no)
 	matcomment= MatComment.objects.all()
 	servicetaxprint = servicetaxprint
 	educationtaxprint = educationtaxprint
 	highereducationtaxprint = highereducationtaxprint
 	net_total1 = bill.net_total
-	from Automation.tcc.convert_function import *
+	from ofau.tcc.convert_function import *
 	net_total_eng = num2eng(net_total1)
 	template = {'job_no': job_no ,'net_total_eng':net_total_eng,
 	'servicetaxprint':servicetaxprint,'highereducationtaxprint':
@@ -920,6 +1091,7 @@ def bill(request):
 		template.items() + tmp.items()), context_instance = 
 		RequestContext(request))
 
+@stop_caching
 def suspence_bill(request):
 	try :
 		job =Job.objects.get(id=request.GET['id'])
@@ -947,14 +1119,14 @@ def suspence_bill(request):
 	'client__client__last_name','client__client__address', 
 	'client__client__city', 'client__client__company',
 	'client__client__state','site',).distinct()
-	from Automation.tcc.variable import *
+	from ofau.tcc.variable import *
 	bill = Bill.objects.get(job_no=job_no)
 	matcomment= MatComment.objects.all()
 	servicetaxprint = servicetaxprint
 	educationtaxprint = educationtaxprint
 	highereducationtaxprint = highereducationtaxprint
 	net_total1 = bill.net_total
-	from Automation.tcc.convert_function import *
+	from ofau.tcc.convert_function import *
 	net_total_eng = num2eng(net_total1)
 	template = {'job_no': job_no ,'net_total_eng':net_total_eng,
 	'servicetaxprint':servicetaxprint,'highereducationtaxprint':
@@ -972,6 +1144,7 @@ def suspence_bill(request):
 		return render_to_response('tcc/suspence_bill1.html', dict(\
 		template.items() + tmp.items()), context_instance = RequestContext(request))
 
+@stop_caching
 def receipt_report(request):
 	"""
 	** receipt_report **
@@ -1004,7 +1177,8 @@ def receipt_report(request):
 	client,'bill':bill,'job':job,'job_date':job_date,'matcomment':matcomment}
 	return render_to_response('tcc/receipt.html',  dict(template.\
 	items() + tmp.items()), context_instance = RequestContext(request))
-	
+
+@stop_caching	
 #@login_required
 def additional(request):
 	"""
@@ -1014,7 +1188,7 @@ def additional(request):
 	all the taxes information.
 	"""
 	
-	from Automation.tcc.variable import *
+	from ofau.tcc.variable import *
 	try :
 		job =Job.objects.get(id=request.GET['id'])
 	except Exception :
@@ -1028,7 +1202,8 @@ def additional(request):
 	:educationtaxprint,}
 	return render_to_response('tcc/additional.html',dict(template.items() + tmp.items()), 
 	context_instance = RequestContext(request))
-		
+
+@stop_caching		
 #@login_required
 def s_report(request):
 	"""
@@ -1056,12 +1231,12 @@ def s_report(request):
 	'client__client__last_name','client__client__address', 
 	'client__client__city', 'client__client__state','site','letter_no',
 	'letter_date','client__client__company').distinct()
-	from Automation.tcc.variable import *
+	from ofau.tcc.variable import *
 	bill = Bill.objects.get(job_no=job_no)
 	bal = Job.objects.values_list('tds',flat=True).filter(job_no=job_no)
 	tdstotal = sum(bal)
 	net_total1 = bill.balance
-	from Automation.tcc.convert_function import *
+	from ofau.tcc.convert_function import *
 	net_total_eng = num2eng(net_total1)
 	template = {'job_no': job_no ,'servicetaxprint' : servicetaxprint,
 	'net_total_eng':net_total_eng,'highereducationtaxprint' : 
@@ -1070,7 +1245,8 @@ def s_report(request):
 	'getadd' : getadd,'tdstotal':tdstotal,'job_date':job_date,}
 	return render_to_response('tcc/suspence_report.html',dict(template.\
 	items() + tmp.items()), context_instance = RequestContext(request))
-	
+
+@stop_caching	
 def g_report(request):
 	"""
 	** g_report **
@@ -1084,7 +1260,9 @@ def g_report(request):
 	temp =  {'amt':amt}
 	return render_to_response('tcc/get_report.html',dict(temp.items() + 
 	tmp.items()), context_instance=RequestContext(request))	
-	
+
+
+@stop_caching	
 #@login_required	
 def rep(request):
 	"""
@@ -1094,7 +1272,7 @@ def rep(request):
 	all the distributions with there amount like college incomee, 
 	admincharge, etc.
 	"""
-	from Automation.tcc.variable import *
+	from ofau.tcc.variable import *
 	query =request.GET.get('id')
 	client = TestTotal.objects.all().get(job_id =query)
 	amount = Amount.objects.all().get(job_id =query)
@@ -1124,7 +1302,7 @@ def rep(request):
 	ratio1 = ratio1(con_type)
 	ratio2 = ratio2(con_type)
 	net_total = amount.unit_price
-	from Automation.tcc.convert_function import *
+	from ofau.tcc.convert_function import *
 	net_total_eng = num2eng(net_total)
 	template = {'net_total_eng' : net_total_eng,'servicetaxprint':
 	servicetaxprint,'highereducationtaxprint':highereducationtaxprint,
@@ -1240,7 +1418,7 @@ def ta_da(request):
 			profile.job = jobid
 			profile.save()
 			return HttpResponseRedirect(reverse(\
-			'Automation.tcc.views.tada_view'))
+			'ofau.tcc.views.tada_view'))
 	else:
 		form = TadaForm()
 	temp = {'form': form,'query':query,'sus':sus}
@@ -1259,17 +1437,6 @@ def tada_view(request):
 	data = {'tada':tada }			
 	return render_to_response('tcc/tada_ok.html', dict(data.items() + 
 	tmp.items()), context_instance=RequestContext(request))
-
-def search_tadasuspence(request):
-	query = request.GET.get('q', '')
-	if query :
-		results = TaDa.objects.filter(job = query).values()
-		
-	else:
-		results = []
-	
-	temp = {"results": results,"query": query,}
-	return render_to_response("tcc/search_tadasuspence.html", dict(temp.items() + tmp.items()), context_instance=RequestContext(request) )
 
 def ta_da_bill(request):
 	"""
@@ -1321,10 +1488,13 @@ def search_transport(request):
 	query = request.GET.get('q', '')
 	if query :
 		results = Transport.objects.filter(job_no = query).values()
+		results1 = TaDa.objects.filter(job = query).values()
 	else:
 		results = []
-	temp = {"results": results,"query": query,}
-	return render_to_response("tcc/search_transport.html", dict(temp.items() + tmp.items()), context_instance=RequestContext(request) )
+		results1 = []
+	temp = {"results": results,"results1": results1,"query": query,}
+	return render_to_response("tcc/search_transport.html", 
+	dict(temp.items() + tmp.items()), context_instance=RequestContext(request) )
 def distance(request):
 	"""
 	** distance **
@@ -1573,7 +1743,7 @@ def suspence_clearence_report(request):
 	amounts3) | Q(code=amounts4) | Q(code=amounts5) | Q(code=amounts6) 
 	| Q(code=amounts7)| Q(code=amounts8)| Q(code=amounts9) | Q(code=
 	amounts10)).order_by('id')
-	from Automation.tcc.variable import *
+	from ofau.tcc.variable import *
 	balance = amount.unit_price
 	college_income = round(collegeincome * balance / 100.00)
 	admin_charge = round(admincharge * balance / 100.00)
@@ -1686,7 +1856,7 @@ def suspence_clearence_report_transport(request):
 			tada =[]
 			balance= testtotal.unit_price - (tempr + suspence.boring_charge_internal)
 			tada_sum =0
-		from Automation.tcc.variable import *
+		from ofau.tcc.variable import *
 		work_charge = round(workcharge * balance / 100.00)
 		college_income = round(collegeincome * balance / 100.00)
 		admin_charge = round(admincharge * balance / 100.00)
@@ -1726,7 +1896,7 @@ def suspence_clearence_report_transport(request):
 			tada =[]
 			balance= tried - (tempr + suspence.boring_charge_internal)
 			tada_sum = 0
-		from Automation.tcc.variable import *
+		from ofau.tcc.variable import *
 		work_charge = round(workcharge * balance / 100.00)
 		college_income = round(collegeincome * balance / 100.00)
 		admin_charge = round(admincharge * balance / 100.00)
@@ -1757,7 +1927,7 @@ def suspence_clearence_report_transport(request):
 		dict(data.items() + tmp.items()) , context_instance=
 		RequestContext(request))
 	
-			
+@stop_caching			
 def prevwork(request):
 	"""
 	** prevwork **
@@ -1803,7 +1973,7 @@ def contact(request):
 	"""
 	if request.method == 'POST':
 		form = ContactForm(request.POST)
-        if form.is_valid():
+		if form.is_valid():
 			cd = form.cleaned_data
 			send_mail(
 				cd['subject'],
@@ -1841,7 +2011,6 @@ def registered_user(request):
 	temp = {'user_list': user_list}
 	return render_to_response("tcc/registered_user.html", dict(temp.items() + 
 	tmp.items()),context_instance=RequestContext(request))
-
 def programme(request):
 	if request.method == 'POST':
 		form = ProgrammeForm(request.POST)
@@ -1857,7 +2026,7 @@ def programme(request):
        		#temp = {'form':form,'staff':staff}
 		organisation = Organisation.objects.all()
 		department = Department.objects.all().filter(id = 1)		
-		done = Programme.objects.all().filter(id=staffid).values('client_department_name', 'phone_no', 'on', 'at', 'addr', 			'city', 'site','date') 
+		done = Programme.objects.all().filter(id=staffid).values('client_department_name', 'phone_no', 'on', 'at', 'addr', 			'city', 'site') 
 		usermax = Programme.objects.aggregate(Max('id'))
 		userid =usermax['id__max']		
 		name_list = UserProfile.objects.all().filter(id=userid).values('first_name', 'last_name')
@@ -1868,7 +2037,7 @@ def programme(request):
 		job_date =job.date
 		amtid = Amount.objects.aggregate(Max('id'))
 		amtmaxid =amtid['id__max']
-		amt = Amount.objects.get(job_id = amtmaxid)
+		amt = Amount.objects.filter(id = amtmaxid).values('report_type')
 		template = {'form': form, 'organisation':organisation,'department':department, 'done':done, 'staff':staff}
 		return render_to_response('tcc/report11.html', template, context_instance=RequestContext(request))	
 			
@@ -1877,3 +2046,4 @@ def programme(request):
 	temp ={'form': form}
 	return render_to_response('tcc/new_client.html',dict(temp.items() + 
 	tmp.items()),context_instance=RequestContext(request))
+

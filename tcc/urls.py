@@ -8,12 +8,12 @@ This file define the urls used in the software for tcc application. In this regu
 from django.conf.urls.defaults import *
 from django.contrib import admin
 admin.autodiscover()
-from Automation.tcc.models import *
+from ofau.tcc.models import *
 #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::#
 
 #:::::::::::::::DEFINE THE URLS HERE::::::::::::::::::::::::::::::::::::#
 
-urlpatterns = patterns('Automation.tcc.views',
+urlpatterns = patterns('ofau.tcc.views',
     (r'^index/$', 'index1'),
     (r'^catalog/$', 'material'),
     (r'^previous/$', 'previous'),
@@ -59,10 +59,13 @@ urlpatterns = patterns('Automation.tcc.views',
     (r'^programme/$', 'programme'),
 	(r'^search_transport/$', 'search_transport'),
     (r'^suspence_bill/$', 'suspence_bill'), 
-    (r'^search_tadasuspence/$', 'search_tadasuspence'),
+	(r'^view_profile/$', 'view_profile'),
+	(r'^jobok/job_ok_show/$', 'job_ok_show'),
+	(r'^jobok/client_job_ok_show/$', 'client_job_ok_show'),
+	(r'^list_search/$','list_search'),
 )
 
-urlpatterns += patterns('Automation.tcc.registers',
+urlpatterns += patterns('ofau.tcc.registers',
 	(r'^monthlyreport/$', 'monthly_report'),
     (r'^dailyreport/$', 'daily_report'),
     (r'^mainreg/$', 'main_register'),
@@ -78,7 +81,7 @@ urlpatterns += patterns('Automation.tcc.registers',
     (r'^consultancy/$', 'consultancy_funds'),
 )
     
-urlpatterns += patterns('Automation.tcc.views_ext',
+urlpatterns += patterns('ofau.tcc.views_ext',
     (r'^selectfield/$', 'perfselectfield'),
     (r'^perfselect/$', 'perfselect'),
     (r'^addperf/$', 'add_perf'),

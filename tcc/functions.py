@@ -3,7 +3,7 @@
 
 This file is defines some important functions that are then called views.py file.  
 """
-from Automation.tcc.header import *
+from ofau.tcc.header import *
 import re
 
 from django.db.models import Q
@@ -25,7 +25,7 @@ def retrieve():
 	Retrieve function is used to retrieve the data defined in variable.py file
 	"""
 
-	from Automation.tcc.variable import *
+	from ofau.tcc.variable import *
 	collegeincome = collegeincome
 	admincharge = admincharge
 	servicetaxprint = servicetaxprint
@@ -143,6 +143,20 @@ def get_query(query_string, search_fields):
             query = query & or_query
     return query
 
-	
+def soundex(name):                 # Added....
+	"""Get the soundex code for the string"""
+	name = name.upper() 
+	soundex = "" 
+	soundex += name[0] 
+	dictionary = {"BFPV": "1", "CGJKQSXZ":"2", "DT":"3", "L":"4", "MN":"5", "R":"6", "AEIOUHWY":"."} 
+	for char in name[1:]: 
+		for key in dictionary.keys(): 
+			if char in key: 
+				code = dictionary[key] 
+				if code != soundex[-1]:
+					soundex += code 
+	soundex = soundex.replace(".", "")
+	soundex = soundex[:4].ljust(4, "0") 	
+	return  soundex	
 
 	
